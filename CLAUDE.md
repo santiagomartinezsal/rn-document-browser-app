@@ -6,6 +6,7 @@ form. Reviewers assess: structure that tolerates requirement changes, several
 kinds of tests, reasoning in README.md, and a readable git history.
 
 ## Hard constraints
+
 - Never write the hiring company's name anywhere: code, comments, file names,
   commit messages, URLs. Say "the challenge server".
 - No database or ORM (no SQLite, Realm, WatermelonDB...). Use plain `fetch`
@@ -17,6 +18,7 @@ kinds of tests, reasoning in README.md, and a readable git history.
 - Match the mockups; pixel-perfect is not a goal.
 
 ## Challenge server (Go, localhost:8080)
+
 - `GET /documents` only. No POST, so creating a document is local-only.
 - Returns 2–22 random documents per request, unordered, PascalCase JSON.
 - `ws://.../notifications` emits a JSON message every 0–5 s
@@ -24,12 +26,14 @@ kinds of tests, reasoning in README.md, and a readable git history.
 - Android emulator reaches the host at 10.0.2.2.
 
 ## Expo: check the docs, not memory
+
 Expo ships breaking changes every SDK release. Before touching an Expo or
 React Native API, read the versioned docs for the `expo` major in
 package.json (https://docs.expo.dev/versions/v<major>.0.0/) or start from
 https://docs.expo.dev/llms.txt.
 
 ## Commands
+
 ```bash
 npx expo install <pkg>   # always, instead of npm install: SDK-compatible versions
 npx expo start
@@ -37,9 +41,11 @@ npx expo lint
 npx tsc --noEmit
 npx expo-doctor          # dependency/config issues
 ```
+
 Run lint and typecheck before declaring a task done.
 
 ## Rules
+
 - `ios/` and `android/` are generated (CNG). Never create, edit or commit
   them; configure native behaviour in app.json and config plugins.
 - Expo Go only ships its bundled native modules. Flag it before adding a
@@ -50,4 +56,5 @@ Run lint and typecheck before declaring a task done.
 - No speculative abstractions; build what the current step needs.
 
 ## Architecture
+
 <!-- add once decided -->
