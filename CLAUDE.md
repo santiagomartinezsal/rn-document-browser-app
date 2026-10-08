@@ -34,15 +34,10 @@ https://docs.expo.dev/llms.txt.
 
 ## Commands
 
-```bash
-npx expo install <pkg>   # always, instead of npm install: SDK-compatible versions
-npx expo start
-npx expo lint
-npx tsc --noEmit
-npx expo-doctor          # dependency/config issues
-```
-
-Run lint and typecheck before declaring a task done.
+- Install packages with `npx expo install <pkg>`, never `npm install <pkg>`:
+  it resolves SDK-compatible versions.
+- Run `npm run lint`, `npm run typecheck` and `npm test` before declaring a
+  task done.
 
 ## Rules
 
@@ -57,4 +52,12 @@ Run lint and typecheck before declaring a task done.
 
 ## Architecture
 
-<!-- add once decided -->
+- Feature folders: `src/features/<feature>/{api,domain,state,ui}`; shared code in `src/shared/`.
+- `domain/` is plain TypeScript (types, repository interfaces, pure services).
+  It never imports from `api/`, `ui/` or React.
+- `api/` implements the domain interfaces: DTOs, mappers, HTTP and WebSocket adapters.
+- The documents repository is the single source of truth: it merges server
+  documents with locally created ones (the server has no POST).
+- State: `useReducer` + Context per feature, no state library.
+- Features don't import each other's internals; each exposes an `index.ts`.
+- Real-time: hand-written reconnecting WebSocket with exponential backoff.
