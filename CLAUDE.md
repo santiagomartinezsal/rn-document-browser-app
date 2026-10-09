@@ -49,6 +49,9 @@ https://docs.expo.dev/llms.txt.
 - One concern per change. Keep diffs small.
 - New logic ships with tests, colocated as `*.test.ts(x)`.
 - No speculative abstractions; build what the current step needs.
+- Plans: once we agree on a plan for a session, write it to
+  `docs/plans/<nn>-<short-name>.md` (e.g. `01-walking-skeleton.md`) and stop. Implement it
+  in a later step, ticking off each commit in the file as I confirm it.
 
 ## Architecture
 
