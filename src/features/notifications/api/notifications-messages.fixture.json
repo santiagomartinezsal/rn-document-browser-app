@@ -1,0 +1,37 @@
+[
+  {
+    "Timestamp": "2026-10-09T16:15:42.570987+02:00",
+    "UserID": "87b9483e-0ed8-40e4-bb8f-4edb6158682c",
+    "UserName": "Hazle Kuhlman",
+    "DocumentID": "45e485e2-9007-4a23-9632-9b0a8c8d6268",
+    "DocumentTitle": "Two Hearted Ale"
+  },
+  {
+    "Timestamp": "2026-10-09T16:15:43.572154+02:00",
+    "UserID": "5877ea62-bda8-4e65-b429-269f937a337e",
+    "UserName": "Antonina Marquardt",
+    "DocumentID": "da7ccb24-dc8a-40ad-9d4c-bbf8f9905b81",
+    "DocumentTitle": "Schneider Aventinus"
+  },
+  {
+    "Timestamp": "2026-10-09T16:15:44.57333+02:00",
+    "UserID": "2fcf74a0-879f-40f2-b93c-aeb167a63864",
+    "UserName": "Betty Little",
+    "DocumentID": "1e150c2d-269f-4a72-b7a2-29424c9bca42",
+    "DocumentTitle": "Nugget Nectar"
+  },
+  {
+    "Timestamp": "2026-10-09T16:15:45.574762+02:00",
+    "UserID": "567ca8e5-f327-4dfc-9810-7958f9b54a95",
+    "UserName": "Houston Blanda",
+    "DocumentID": "9d4a3055-a5f8-4c03-8546-f7ce004f4108",
+    "DocumentTitle": "Péché Mortel"
+  },
+  {
+    "Timestamp": "2026-10-09T16:15:45.574824+02:00",
+    "UserID": "76cb0876-25e3-48d9-b8a9-4e826601d65a",
+    "UserName": "Neil Volkman",
+    "DocumentID": "28ce745c-e113-4839-85d2-a4cd344a9492",
+    "DocumentTitle": "Brooklyn Black"
+  }
+]

@@ -1,0 +1,192 @@
+[
+    {
+        "ID": "43afce49-5867-4b28-8385-40c0be6437ab",
+        "CreatedAt": "1965-12-16T21:26:52.949094221Z",
+        "UpdatedAt": "1989-12-01T20:21:18.070155546Z",
+        "Title": "Chimay Grande R\u00e9serve",
+        "Attachments": [
+            "Porter",
+            "Belgian Strong Ale",
+            "Scottish And Irish Ale",
+            "Sour Ale"
+        ],
+        "Contributors": [
+            {
+                "ID": "51fea9fb-9f4a-45e8-82aa-12c560bfeb2c",
+                "Name": "Brendon Ward"
+            },
+            {
+                "ID": "31070e6a-2ab2-4e67-93cc-601e2be93c69",
+                "Name": "Glennie Braun"
+            },
+            {
+                "ID": "18fb3144-a1e9-479c-887b-c1fc391c30e9",
+                "Name": "Ronaldo Jenkins"
+            }
+        ],
+        "Version": "4.8.12"
+    },
+    {
+        "ID": "ffaeaa66-cb21-4df4-9788-02c44fd22c2f",
+        "CreatedAt": "1991-10-23T04:42:31.799427577Z",
+        "UpdatedAt": "1974-10-10T10:46:26.946237074Z",
+        "Title": "Two Hearted Ale",
+        "Attachments": [
+            "Dark Lager",
+            "German Wheat And Rye Beer",
+            "India Pale Ale"
+        ],
+        "Contributors": [
+            {
+                "ID": "e42e13dd-331a-4b38-8f3b-c560b892b242",
+                "Name": "Christiana Lebsack"
+            },
+            {
+                "ID": "6ef30e7c-d726-43cf-92f3-9dac52a26819",
+                "Name": "Gunner Gottlieb"
+            },
+            {
+                "ID": "114eab35-7569-4101-8508-f7fb0574d5ee",
+                "Name": "Hyman Wisozk"
+            },
+            {
+                "ID": "4ce060f3-ee13-4e9f-872d-537e4705f024",
+                "Name": "Leonard Rowe"
+            }
+        ],
+        "Version": "1.2.5"
+    },
+    {
+        "ID": "80c217fb-5f96-471d-beb5-eff2aad507ac",
+        "CreatedAt": "2007-12-01T22:04:27.549788396Z",
+        "UpdatedAt": "1913-09-27T10:19:47.031427732Z",
+        "Title": "Hop Rod Rye",
+        "Attachments": [
+            "Merican Ale",
+            "Belgian And French Ale",
+            "Strong Ale"
+        ],
+        "Contributors": [
+            {
+                "ID": "64313138-0f39-4054-91cd-31c1f6d715a2",
+                "Name": "Rasheed VonRueden"
+            },
+            {
+                "ID": "014bdd32-f2f1-463f-9a73-226e1a5dac3b",
+                "Name": "Ellie Wuckert"
+            },
+            {
+                "ID": "8975adf4-1121-4204-a225-fe79f7c95e66",
+                "Name": "Amy Schoen"
+            }
+        ],
+        "Version": "2.12.3"
+    },
+    {
+        "ID": "162fa808-a1d4-42ce-bfe6-0c2360d77e67",
+        "CreatedAt": "2015-03-30T04:14:20.019713652Z",
+        "UpdatedAt": "1947-06-06T12:38:59.91353012Z",
+        "Title": "Alpha King Pale Ale",
+        "Attachments": [
+            "Sour Ale",
+            "Scottish And Irish Ale",
+            "Pilsner",
+            "Light Lager"
+        ],
+        "Contributors": [
+            {
+                "ID": "b582a7d3-fcc7-41b3-8c2e-5f021099f8e6",
+                "Name": "Oceane Barrows"
+            },
+            {
+                "ID": "828a8f27-c94f-49a5-8dff-d2c9eb34f4eb",
+                "Name": "Vivian Renner"
+            },
+            {
+                "ID": "ae502f93-8a22-44b4-8803-d40b7f190db6",
+                "Name": "Chyna Luettgen"
+            },
+            {
+                "ID": "83a98855-db7a-4a00-b889-db0de09995bd",
+                "Name": "Jodie Johns"
+            }
+        ],
+        "Version": "2.5.8"
+    },
+    {
+        "ID": "d1d4e162-47bd-44c8-ab56-d964fb5f080a",
+        "CreatedAt": "2020-12-18T14:29:53.955268369Z",
+        "UpdatedAt": "1944-03-22T09:53:16.178255761Z",
+        "Title": "Maudite",
+        "Attachments": [
+            "Bock",
+            "Belgian Strong Ale"
+        ],
+        "Contributors": [
+            {
+                "ID": "81c4a629-5921-45c5-8bc8-54758ea5e5ef",
+                "Name": "Rosendo Braun"
+            },
+            {
+                "ID": "a2ba4383-098d-4e2f-b8da-842eac4581d8",
+                "Name": "Addie Casper"
+            }
+        ],
+        "Version": "1.10.11"
+    },
+    {
+        "ID": "b811e9bf-b1a4-4a6e-9ab6-ad3c8316c399",
+        "CreatedAt": "1969-12-19T19:10:35.343041044Z",
+        "UpdatedAt": "2002-12-05T22:37:27.764144214Z",
+        "Title": "90 Minute IPA",
+        "Attachments": [
+            "Strong Ale",
+            "Strong Ale",
+            "Smoke-flavored"
+        ],
+        "Contributors": [
+            {
+                "ID": "6b5f0747-7963-42ad-b281-db0795c1b6c9",
+                "Name": "Estevan Abbott"
+            },
+            {
+                "ID": "1803d942-f352-4d7e-a8cd-feb773f0873f",
+                "Name": "Ciara Bauch"
+            },
+            {
+                "ID": "53e6b219-19d1-4419-8dac-f1101362ba80",
+                "Name": "Edmund Bruen"
+            }
+        ],
+        "Version": "2.2.14"
+    },
+    {
+        "ID": "7f462165-feb9-4a47-8aca-b76f8d9b3430",
+        "CreatedAt": "1989-02-16T12:04:29.566237248Z",
+        "UpdatedAt": "1969-11-14T19:28:29.110006638Z",
+        "Title": "Trois Pistoles",
+        "Attachments": [
+            "Porter",
+            "Bock"
+        ],
+        "Contributors": [
+            {
+                "ID": "ea81d526-64f8-45f0-a4ef-394a0da2d8dc",
+                "Name": "Yessenia VonRueden"
+            },
+            {
+                "ID": "9dab0f6d-2efb-4f51-b2e4-7edb29562e20",
+                "Name": "Imelda Jacobi"
+            },
+            {
+                "ID": "e6b938d8-c2be-49d1-b7ae-59d4a0d92aab",
+                "Name": "Arlene Von"
+            },
+            {
+                "ID": "0027d199-a0ef-4e12-8d9b-fbeff0249862",
+                "Name": "Hipolito Jenkins"
+            }
+        ],
+        "Version": "3.9.16"
+    }
+]
