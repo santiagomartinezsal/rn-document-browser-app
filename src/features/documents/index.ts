@@ -1,20 +1,18 @@
 import { getHttpBaseUrl } from '@/shared/http/serverConfig';
 
 import { createInMemoryLocalDocumentsSource } from './api/inMemoryLocalDocumentsSource';
+import { createMergingDocumentsRepository } from './api/mergingDocumentsRepository';
 import { createServerDocumentsRepository } from './api/serverDocumentsRepository';
-import type { DocumentsRepository } from './domain/documentsRepository';
-import type { LocalDocumentsSource } from './domain/localDocumentsSource';
+import type { DocumentsRepository, DocumentsWriter } from './domain/documentsRepository';
 import { DocumentsProvider } from './state/DocumentsRepositoryContext';
-import { LocalDocumentsSourceProvider } from './state/LocalDocumentsSourceContext';
 import { DocumentsScreen } from './ui/DocumentsScreen';
 
-export { DocumentsProvider, DocumentsScreen, LocalDocumentsSourceProvider };
-export type { DocumentsRepository, LocalDocumentsSource };
+export { DocumentsProvider, DocumentsScreen };
+export type { DocumentsRepository };
 
-export function createDocumentsRepository(): DocumentsRepository {
-  return createServerDocumentsRepository(getHttpBaseUrl());
-}
-
-export function createLocalDocumentsSource(): LocalDocumentsSource {
-  return createInMemoryLocalDocumentsSource();
+export function createDocumentsRepository(): DocumentsRepository & DocumentsWriter {
+  return createMergingDocumentsRepository(
+    createServerDocumentsRepository(getHttpBaseUrl()),
+    createInMemoryLocalDocumentsSource(),
+  );
 }

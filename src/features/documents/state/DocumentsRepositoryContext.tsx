@@ -1,9 +1,11 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 
-import type { DocumentsRepository } from '../domain/documentsRepository';
+import type { DocumentsRepository, DocumentsWriter } from '../domain/documentsRepository';
 
-const DocumentsRepositoryContext = createContext<DocumentsRepository | null>(null);
+type WritableDocumentsRepository = DocumentsRepository & DocumentsWriter;
+
+const DocumentsRepositoryContext = createContext<WritableDocumentsRepository | null>(null);
 
 export interface DocumentsProviderProps {
   /**
@@ -11,7 +13,7 @@ export interface DocumentsProviderProps {
    * component, or memoized) — useDocuments depends on it, so a new reference
    * on every render would refetch on every render.
    */
-  repository: DocumentsRepository;
+  repository: WritableDocumentsRepository;
   children: ReactNode;
 }
 
@@ -23,7 +25,7 @@ export function DocumentsProvider({ repository, children }: DocumentsProviderPro
   );
 }
 
-export function useDocumentsRepository(): DocumentsRepository {
+export function useDocumentsRepository(): WritableDocumentsRepository {
   const repository = useContext(DocumentsRepositoryContext);
   if (!repository) {
     throw new Error('useDocumentsRepository must be used within a DocumentsProvider');

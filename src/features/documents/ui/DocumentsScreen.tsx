@@ -61,7 +61,7 @@ function DocumentsBody() {
       <AddDocumentModal
         visible={isAddDocumentModalOpen}
         onClose={() => setIsAddDocumentModalOpen(false)}
-        onSubmit={addDocument}
+        onSubmit={(input) => void addDocument(input)}
       />
     </View>
   );

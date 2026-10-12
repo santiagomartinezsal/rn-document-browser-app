@@ -6,7 +6,6 @@ import type { SortKey } from '../domain/sortDocuments';
 import { useDocumentsRepository } from './DocumentsRepositoryContext';
 import { documentsReducer, initialDocumentsState } from './documentsReducer';
 import type { DocumentsState } from './documentsReducer';
-import { useLocalDocumentsSource } from './LocalDocumentsSourceContext';
 
 export type ViewMode = 'list' | 'grid';
 
@@ -19,12 +18,11 @@ export interface UseDocumentsResult {
   setSortBy: (sortBy: SortKey) => void;
   viewMode: ViewMode;
   setViewMode: (viewMode: ViewMode) => void;
-  addDocument: (input: CreateDocumentInput) => void;
+  addDocument: (input: CreateDocumentInput) => Promise<void>;
 }
 
 export function useDocuments(): UseDocumentsResult {
   const repository = useDocumentsRepository();
-  const localSource = useLocalDocumentsSource();
   const [state, dispatch] = useReducer(documentsReducer, initialDocumentsState);
   const [fetchAttempt, setFetchAttempt] = useState(0);
   const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT_KEY);
@@ -34,8 +32,9 @@ export function useDocuments(): UseDocumentsResult {
     setFetchAttempt((previousAttempt) => previousAttempt + 1);
   };
 
-  const addDocument = (input: CreateDocumentInput) => {
-    dispatch({ type: 'DOCUMENT_CREATED', document: localSource.add(input) });
+  const addDocument = async (input: CreateDocumentInput) => {
+    const document = await repository.create(input);
+    dispatch({ type: 'DOCUMENT_CREATED', document });
   };
 
   useEffect(() => {

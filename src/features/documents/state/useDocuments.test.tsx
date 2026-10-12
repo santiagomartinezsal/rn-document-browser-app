@@ -2,12 +2,12 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
 import type { Document } from '../domain/document';
-import type { DocumentsRepository } from '../domain/documentsRepository';
-import type { LocalDocumentsSource } from '../domain/localDocumentsSource';
+import type { DocumentsRepository, DocumentsWriter } from '../domain/documentsRepository';
 import { DEFAULT_SORT_KEY } from '../domain/sortDocuments';
 import { DocumentsProvider } from './DocumentsRepositoryContext';
-import { LocalDocumentsSourceProvider } from './LocalDocumentsSourceContext';
 import { useDocuments } from './useDocuments';
+
+type WritableDocumentsRepository = DocumentsRepository & DocumentsWriter;
 
 const sampleDocuments: Document[] = [
   {
@@ -21,26 +21,19 @@ const sampleDocuments: Document[] = [
   },
 ];
 
-function buildLocalSource(overrides: Partial<LocalDocumentsSource> = {}): LocalDocumentsSource {
+function buildRepository(
+  overrides: Partial<WritableDocumentsRepository> = {},
+): WritableDocumentsRepository {
   return {
-    add: jest.fn(),
-    getAll: jest.fn().mockReturnValue([]),
+    getAll: jest.fn().mockResolvedValue([]),
+    create: jest.fn(),
     ...overrides,
   };
 }
 
-function renderWithRepository(
-  repository: DocumentsRepository,
-  localSource: LocalDocumentsSource = buildLocalSource(),
-) {
+function renderWithRepository(repository: WritableDocumentsRepository) {
   function wrapper({ children }: { children: ReactNode }) {
-    return (
-      <DocumentsProvider repository={repository}>
-        <LocalDocumentsSourceProvider localSource={localSource}>
-          {children}
-        </LocalDocumentsSourceProvider>
-      </DocumentsProvider>
-    );
+    return <DocumentsProvider repository={repository}>{children}</DocumentsProvider>;
   }
 
   return renderHook(() => useDocuments(), { wrapper });
@@ -48,9 +41,9 @@ function renderWithRepository(
 
 describe('useDocuments', () => {
   it('resolves to success with the repository documents', async () => {
-    const repository: DocumentsRepository = {
+    const repository = buildRepository({
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
+    });
 
     const { result } = await renderWithRepository(repository);
 
@@ -60,9 +53,9 @@ describe('useDocuments', () => {
   });
 
   it('resolves to error with the failure message when the repository rejects', async () => {
-    const repository: DocumentsRepository = {
+    const repository = buildRepository({
       getAll: jest.fn().mockRejectedValue(new Error('network down')),
-    };
+    });
 
     const { result } = await renderWithRepository(repository);
 
@@ -76,7 +69,7 @@ describe('useDocuments', () => {
       .fn<ReturnType<DocumentsRepository['getAll']>, []>()
       .mockRejectedValueOnce(new Error('network down'))
       .mockResolvedValueOnce(sampleDocuments);
-    const repository: DocumentsRepository = { getAll };
+    const repository = buildRepository({ getAll });
 
     const { result } = await renderWithRepository(repository);
 
@@ -101,9 +94,9 @@ describe('useDocuments', () => {
   });
 
   it('defaults sortBy to DEFAULT_SORT_KEY', async () => {
-    const repository: DocumentsRepository = {
+    const repository = buildRepository({
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
+    });
 
     const { result } = await renderWithRepository(repository);
 
@@ -111,9 +104,9 @@ describe('useDocuments', () => {
   });
 
   it('updates sortBy when setSortBy is called', async () => {
-    const repository: DocumentsRepository = {
+    const repository = buildRepository({
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
+    });
 
     const { result } = await renderWithRepository(repository);
 
@@ -129,7 +122,7 @@ describe('useDocuments', () => {
       .fn<ReturnType<DocumentsRepository['getAll']>, []>()
       .mockRejectedValueOnce(new Error('network down'))
       .mockResolvedValueOnce(sampleDocuments);
-    const repository: DocumentsRepository = { getAll };
+    const repository = buildRepository({ getAll });
 
     const { result } = await renderWithRepository(repository);
 
@@ -152,9 +145,9 @@ describe('useDocuments', () => {
   });
 
   it('defaults viewMode to list', async () => {
-    const repository: DocumentsRepository = {
+    const repository = buildRepository({
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
+    });
 
     const { result } = await renderWithRepository(repository);
 
@@ -162,9 +155,9 @@ describe('useDocuments', () => {
   });
 
   it('updates viewMode when setViewMode is called', async () => {
-    const repository: DocumentsRepository = {
+    const repository = buildRepository({
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
+    });
 
     const { result } = await renderWithRepository(repository);
 
@@ -180,7 +173,7 @@ describe('useDocuments', () => {
       .fn<ReturnType<DocumentsRepository['getAll']>, []>()
       .mockRejectedValueOnce(new Error('network down'))
       .mockResolvedValueOnce(sampleDocuments);
-    const repository: DocumentsRepository = { getAll };
+    const repository = buildRepository({ getAll });
 
     const { result } = await renderWithRepository(repository);
 
@@ -202,10 +195,7 @@ describe('useDocuments', () => {
     expect(result.current.viewMode).toBe('grid');
   });
 
-  it('prepends the document returned by the local source when addDocument is called', async () => {
-    const repository: DocumentsRepository = {
-      getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
+  it('prepends the document returned by repository.create when addDocument is called', async () => {
     const createdDocument: Document = {
       id: 'local-123',
       title: 'New Doc',
@@ -215,19 +205,22 @@ describe('useDocuments', () => {
       attachments: ['manual.pdf'],
       contributors: [],
     };
-    const localSource = buildLocalSource({ add: jest.fn().mockReturnValue(createdDocument) });
+    const repository = buildRepository({
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+      create: jest.fn().mockResolvedValue(createdDocument),
+    });
 
-    const { result } = await renderWithRepository(repository, localSource);
+    const { result } = await renderWithRepository(repository);
     await waitFor(() => {
       expect(result.current.state.status).toBe('success');
     });
 
     const input = { title: 'New Doc', version: '1.0.0', fileName: 'manual.pdf' };
-    await act(() => {
-      result.current.addDocument(input);
+    await act(async () => {
+      await result.current.addDocument(input);
     });
 
-    expect(localSource.add).toHaveBeenCalledWith(input);
+    expect(repository.create).toHaveBeenCalledWith(input);
     expect(result.current.state).toEqual({
       status: 'success',
       documents: [createdDocument, ...sampleDocuments],

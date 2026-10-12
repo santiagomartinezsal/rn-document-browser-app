@@ -2,10 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import * as DocumentPicker from 'expo-document-picker';
 
 import { createInMemoryLocalDocumentsSource } from '../api/inMemoryLocalDocumentsSource';
+import { createMergingDocumentsRepository } from '../api/mergingDocumentsRepository';
 import type { Document } from '../domain/document';
 import type { DocumentsRepository } from '../domain/documentsRepository';
 import { DocumentsProvider } from '../state/DocumentsRepositoryContext';
-import { LocalDocumentsSourceProvider } from '../state/LocalDocumentsSourceContext';
 import { DocumentsScreen } from './DocumentsScreen';
 
 jest.mock('expo-document-picker', () => ({
@@ -33,12 +33,11 @@ const sampleDocuments: Document[] = [
   },
 ];
 
-function renderScreen(repository: DocumentsRepository) {
+function renderScreen(server: DocumentsRepository) {
+  const repository = createMergingDocumentsRepository(server, createInMemoryLocalDocumentsSource());
   return render(
     <DocumentsProvider repository={repository}>
-      <LocalDocumentsSourceProvider localSource={createInMemoryLocalDocumentsSource()}>
-        <DocumentsScreen />
-      </LocalDocumentsSourceProvider>
+      <DocumentsScreen />
     </DocumentsProvider>,
   );
 }

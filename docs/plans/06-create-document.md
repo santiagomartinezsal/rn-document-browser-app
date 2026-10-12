@@ -77,7 +77,7 @@ trigger button is visible at the bottom of `mockups/mdc_1.png` (list view).
     `status === 'success'`), opening the modal via local `useState`, same
     precedent as `SortMenu`.
 
-- [ ] **2. Extract an in-memory local documents source**
+- [x] **2. Extract an in-memory local documents source**
 
   Pure refactor: moves the ad-hoc document-building out of the hook into a
   proper, independently-testable port + implementation. External behavior
