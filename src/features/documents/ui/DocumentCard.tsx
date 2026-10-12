@@ -13,7 +13,7 @@ export function DocumentCard({ document }: DocumentCardProps) {
   return (
     <View testID={`document-${document.id}`} style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>{document.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>{document.title}</Text>
         <Text style={styles.version}>Version {document.version}</Text>
       </View>
       <View style={styles.columns}>
@@ -60,10 +60,12 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: '700',
     color: colors.textPrimary,
+    flexShrink: 1,
   },
   version: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
+    flexShrink: 0,
   },
   columns: {
     flexDirection: 'row',
