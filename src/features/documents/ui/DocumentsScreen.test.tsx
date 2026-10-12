@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import type { Document } from '../domain/document';
 import type { DocumentsRepository } from '../domain/documentsRepository';
@@ -63,7 +63,7 @@ describe('DocumentsScreen', () => {
     expect(await screen.findByText('First Document')).toBeOnTheScreen();
   });
 
-  it('shows an error message when the repository rejects', async () => {
+  it('shows an error message and a retry button when the repository rejects', async () => {
     const repository: DocumentsRepository = {
       getAll: jest.fn().mockRejectedValue(new Error('network down')),
     };
@@ -72,5 +72,33 @@ describe('DocumentsScreen', () => {
 
     expect(await screen.findByTestId('documents-error')).toBeOnTheScreen();
     expect(screen.getByText('network down')).toBeOnTheScreen();
+    expect(screen.getByTestId('documents-retry-button')).toBeOnTheScreen();
+  });
+
+  it('reaches the document list when retry is pressed after a failure', async () => {
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(sampleDocuments);
+    const repository: DocumentsRepository = { getAll };
+
+    await renderScreen(repository);
+
+    await screen.findByTestId('documents-error');
+    await fireEvent.press(screen.getByTestId('documents-retry-button'));
+
+    expect(await screen.findByText('First Document')).toBeOnTheScreen();
+    expect(getAll).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows an empty state when the repository resolves with no documents', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue([]),
+    };
+
+    await renderScreen(repository);
+
+    expect(await screen.findByTestId('documents-empty')).toBeOnTheScreen();
+    expect(screen.getByText('No documents yet.')).toBeOnTheScreen();
   });
 });

@@ -62,7 +62,7 @@ small "users"/"link" icons the mockup shows next to the Contributors/Attachments
     `result.current.retry()` inside `act`, assert it reaches success and `repository.getAll` was
     called twice.
 
-- [ ] **3. `DocumentsScreen` wiring (card, empty state, retry control)**
+- [x] **3. `DocumentsScreen` wiring (card, empty state, retry control)**
   - `src/features/documents/ui/DocumentsScreen.tsx` — remove the inline `DocumentRow` function;
     `renderItem` uses `<DocumentCard document={item} />`. Error branch keeps
     `testID="documents-error"` + message text, adds a
