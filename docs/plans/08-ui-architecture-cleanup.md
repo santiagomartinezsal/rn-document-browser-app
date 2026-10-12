@@ -62,7 +62,7 @@ Verified repo state: working tree clean on `main`
   - `src/app/App.test.tsx` — add `expect(await screen.findByText('Documents')).toBeOnTheScreen()`
     so the `App` → `AppHeader` `title="Documents"` wiring stays covered.
 
-- [ ] **2. `refactor(shared): extract a shared bottom-sheet modal`**
+- [x] **2. `refactor(shared): extract a shared bottom-sheet modal`**
   - `src/shared/ui/BottomSheetModal.tsx` (new) —
     `BottomSheetModal({ visible, title, onClose, children, testID })`:
     the `Modal`(`transparent`, `animationType="slide"`,

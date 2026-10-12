@@ -1,7 +1,7 @@
-import { Feather } from '@expo/vector-icons';
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
+import { BottomSheetModal } from '@/shared/ui/BottomSheetModal';
+import { colors, fontSize, spacing } from '@/shared/ui/theme';
 
 import type { Notification } from '../domain/notification';
 
@@ -26,63 +26,29 @@ function NotificationRow({ notification }: { notification: Notification }) {
 
 export function NotificationsPanel({ visible, notifications, onClose }: NotificationsPanelProps) {
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Notifications</Text>
-            <Pressable
-              testID="notifications-panel-close-button"
-              accessibilityRole="button"
-              onPress={onClose}
-            >
-              <Feather name="x" size={iconSize.sm} color={colors.textSecondary} />
-            </Pressable>
-          </View>
-
-          {notifications.length === 0 ? (
-            <Text testID="notifications-panel-empty" style={styles.emptyText}>
-              No notifications yet.
-            </Text>
-          ) : (
-            <FlatList
-              testID="notifications-panel-list"
-              data={notifications}
-              keyExtractor={(notification) =>
-                `${notification.documentId}-${notification.timestamp}`
-              }
-              renderItem={({ item }) => <NotificationRow notification={item} />}
-            />
-          )}
-        </View>
-      </View>
-    </Modal>
+    <BottomSheetModal
+      visible={visible}
+      title="Notifications"
+      onClose={onClose}
+      closeButtonTestID="notifications-panel-close-button"
+    >
+      {notifications.length === 0 ? (
+        <Text testID="notifications-panel-empty" style={styles.emptyText}>
+          No notifications yet.
+        </Text>
+      ) : (
+        <FlatList
+          testID="notifications-panel-list"
+          data={notifications}
+          keyExtractor={(notification) => `${notification.documentId}-${notification.timestamp}`}
+          renderItem={({ item }) => <NotificationRow notification={item} />}
+        />
+      )}
+    </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.md,
-    borderTopRightRadius: borderRadius.md,
-    padding: spacing.lg,
-    maxHeight: '70%',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
   emptyText: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,

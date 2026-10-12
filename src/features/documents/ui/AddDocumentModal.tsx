@@ -2,8 +2,9 @@ import { Feather } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { BottomSheetModal } from '@/shared/ui/BottomSheetModal';
 import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 import type { CreateDocumentInput } from '../domain/document';
@@ -76,92 +77,61 @@ export function AddDocumentModal({ visible, onClose, onSubmit }: AddDocumentModa
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Add document</Text>
-            <Pressable
-              testID="add-document-close-button"
-              accessibilityRole="button"
-              onPress={handleClose}
-            >
-              <Feather name="x" size={iconSize.sm} color={colors.textSecondary} />
-            </Pressable>
-          </View>
+    <BottomSheetModal
+      visible={visible}
+      title="Add document"
+      onClose={handleClose}
+      closeButtonTestID="add-document-close-button"
+    >
+      <Text style={styles.sectionLabel}>Document informations</Text>
 
-          <Text style={styles.sectionLabel}>Document informations</Text>
+      <Field label="Name" error={errors.title}>
+        <TextInput
+          testID="add-document-title-input"
+          style={styles.input}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Placeholder"
+        />
+      </Field>
 
-          <Field label="Name" error={errors.title}>
-            <TextInput
-              testID="add-document-title-input"
-              style={styles.input}
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Placeholder"
-            />
-          </Field>
+      <Field label="Version" error={errors.version}>
+        <TextInput
+          testID="add-document-version-input"
+          style={styles.input}
+          value={version}
+          onChangeText={setVersion}
+          placeholder="Placeholder"
+        />
+      </Field>
 
-          <Field label="Version" error={errors.version}>
-            <TextInput
-              testID="add-document-version-input"
-              style={styles.input}
-              value={version}
-              onChangeText={setVersion}
-              placeholder="Placeholder"
-            />
-          </Field>
+      <Field label="File" error={errors.fileName}>
+        <Pressable
+          testID="add-document-choose-file-button"
+          accessibilityRole="button"
+          onPress={() => void pickFile()}
+          style={styles.chooseFileButton}
+        >
+          <Feather name="file-text" size={iconSize.sm} color={colors.accent} />
+          <Text style={styles.chooseFileText}>
+            {fileName ? truncateFileName(fileName) : 'Choose file'}
+          </Text>
+        </Pressable>
+      </Field>
 
-          <Field label="File" error={errors.fileName}>
-            <Pressable
-              testID="add-document-choose-file-button"
-              accessibilityRole="button"
-              onPress={() => void pickFile()}
-              style={styles.chooseFileButton}
-            >
-              <Feather name="file-text" size={iconSize.sm} color={colors.accent} />
-              <Text style={styles.chooseFileText}>
-                {fileName ? truncateFileName(fileName) : 'Choose file'}
-              </Text>
-            </Pressable>
-          </Field>
-
-          <Pressable
-            testID="add-document-submit-button"
-            accessibilityRole="button"
-            onPress={handleSubmit}
-            style={styles.submitButton}
-          >
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </Pressable>
-        </View>
-      </View>
-    </Modal>
+      <Pressable
+        testID="add-document-submit-button"
+        accessibilityRole="button"
+        onPress={handleSubmit}
+        style={styles.submitButton}
+      >
+        <Text style={styles.submitButtonText}>Submit</Text>
+      </Pressable>
+    </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.md,
-    borderTopRightRadius: borderRadius.md,
-    padding: spacing.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
   sectionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',
