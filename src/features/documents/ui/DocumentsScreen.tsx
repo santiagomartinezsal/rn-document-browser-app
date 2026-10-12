@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,6 +9,8 @@ import { sortDocuments } from '../domain/sortDocuments';
 import { useDocuments } from '../state/useDocuments';
 import { DocumentCard } from './DocumentCard';
 import { SortMenu } from './SortMenu';
+import type { ViewMode } from './ViewModeToggle';
+import { ViewModeToggle } from './ViewModeToggle';
 
 function Header() {
   return (
@@ -64,6 +67,7 @@ function DocumentList({ documents }: { documents: Document[] }) {
 
 function DocumentsBody() {
   const { state, retry, sortBy, setSortBy } = useDocuments();
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   if (state.status === 'error') {
     return <ErrorState message={state.message} onRetry={retry} />;
@@ -81,6 +85,7 @@ function DocumentsBody() {
     <View style={styles.body}>
       <View style={styles.toolbar}>
         <SortMenu selected={sortBy} onChange={setSortBy} />
+        <ViewModeToggle selected={viewMode} onChange={setViewMode} />
       </View>
       <DocumentList documents={sortDocuments(state.documents, sortBy)} />
     </View>
@@ -114,6 +119,8 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: spacing.lg,
     backgroundColor: colors.background,
   },

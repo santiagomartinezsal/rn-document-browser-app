@@ -70,6 +70,37 @@ describe('DocumentsScreen', () => {
     expect(getRenderedDocumentIds()).toEqual(['document-doc-2', 'document-doc-1']);
   });
 
+  it('shows the view mode toggle with list selected by default', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    await renderScreen(repository);
+    await screen.findByText('First Document');
+
+    expect(screen.getByTestId('view-mode-button-list').props.accessibilityState).toEqual({
+      selected: true,
+    });
+    expect(screen.getByTestId('view-mode-button-grid').props.accessibilityState).toEqual({
+      selected: false,
+    });
+  });
+
+  it('selects the grid segment when pressed', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    await renderScreen(repository);
+    await screen.findByText('First Document');
+
+    await fireEvent.press(screen.getByTestId('view-mode-button-grid'));
+
+    expect(screen.getByTestId('view-mode-button-grid').props.accessibilityState).toEqual({
+      selected: true,
+    });
+  });
+
   it('shows a loading state before the repository resolves', async () => {
     let resolveGetAll: (documents: Document[]) => void = () => {};
     const pendingGetAll = new Promise<Document[]>((resolve) => {
