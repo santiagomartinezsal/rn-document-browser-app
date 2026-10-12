@@ -16,6 +16,18 @@ describe('NotificationBell', () => {
     expect(screen.getByText('3')).toBeOnTheScreen();
   });
 
+  it('caps the displayed count at 99 when the unread count exceeds it', async () => {
+    await render(<NotificationBell unreadCount={100} onPress={jest.fn()} />);
+
+    expect(screen.getByText('99')).toBeOnTheScreen();
+  });
+
+  it('shows the exact count at the 99 boundary', async () => {
+    await render(<NotificationBell unreadCount={99} onPress={jest.fn()} />);
+
+    expect(screen.getByText('99')).toBeOnTheScreen();
+  });
+
   it('calls onPress when pressed', async () => {
     const onPress = jest.fn();
     await render(<NotificationBell unreadCount={0} onPress={onPress} />);

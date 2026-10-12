@@ -7,15 +7,21 @@ import type { NotificationsState } from './notificationsReducer';
 export interface UseNotificationsResult {
   items: NotificationsState['items'];
   unreadCount: NotificationsState['unreadCount'];
-  markAllRead: () => void;
+  isPanelOpen: NotificationsState['isPanelOpen'];
+  openPanel: () => void;
+  closePanel: () => void;
 }
 
 export function useNotifications(): UseNotificationsResult {
   const source = useNotificationsSource();
   const [state, dispatch] = useReducer(notificationsReducer, initialNotificationsState);
 
-  const markAllRead = () => {
-    dispatch({ type: 'NOTIFICATIONS_READ' });
+  const openPanel = () => {
+    dispatch({ type: 'PANEL_OPENED' });
+  };
+
+  const closePanel = () => {
+    dispatch({ type: 'PANEL_CLOSED' });
   };
 
   useEffect(() => {
@@ -29,5 +35,11 @@ export function useNotifications(): UseNotificationsResult {
     };
   }, [source]);
 
-  return { items: state.items, unreadCount: state.unreadCount, markAllRead };
+  return {
+    items: state.items,
+    unreadCount: state.unreadCount,
+    isPanelOpen: state.isPanelOpen,
+    openPanel,
+    closePanel,
+  };
 }

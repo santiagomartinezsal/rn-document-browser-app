@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { NotificationBell, NotificationsPanel, useNotifications } from '@/features/notifications';
 import { colors, fontSize, spacing } from '@/shared/ui/theme';
 
 import { sortDocuments } from '../domain/sortDocuments';
@@ -17,9 +18,13 @@ import { SortMenu } from './SortMenu';
 import { ViewModeToggle } from './ViewModeToggle';
 
 function Header() {
+  const { items, unreadCount, isPanelOpen, openPanel, closePanel } = useNotifications();
+
   return (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>Documents</Text>
+      <NotificationBell unreadCount={unreadCount} onPress={openPanel} />
+      <NotificationsPanel visible={isPanelOpen} notifications={items} onClose={closePanel} />
     </View>
   );
 }
@@ -81,6 +86,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: spacing.lg,
     backgroundColor: colors.surface,
   },

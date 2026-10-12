@@ -2,6 +2,11 @@ import { render, screen } from '@testing-library/react-native';
 
 import App from '@/app/App';
 
+jest.mock('@/features/notifications', () => ({
+  ...jest.requireActual('@/features/notifications'),
+  createNotificationsSource: () => ({ subscribe: jest.fn(), start: jest.fn(), stop: jest.fn() }),
+}));
+
 const serverResponse = [
   {
     ID: '43afce49-5867-4b28-8385-40c0be6437ab',

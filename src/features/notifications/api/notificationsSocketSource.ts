@@ -4,6 +4,20 @@ import type { Notification } from '../domain/notification';
 import type { NotificationsSource } from '../domain/notificationsSource';
 import { InvalidNotificationError, parseNotification } from './notificationParser';
 
+// React Native has no global `MessageEvent`, which partysocket needs to
+// reconstruct the underlying socket's message events (see onmessage below).
+if (typeof globalThis.MessageEvent === 'undefined') {
+  class MessageEventPolyfill extends Event {
+    data: unknown;
+
+    constructor(type: string, eventInitDict: { data?: unknown } = {}) {
+      super(type);
+      this.data = eventInitDict.data;
+    }
+  }
+  globalThis.MessageEvent = MessageEventPolyfill as unknown as typeof MessageEvent;
+}
+
 interface PartySocketLike {
   onmessage: ((event: { data: string }) => void) | null;
   reconnect(): void;

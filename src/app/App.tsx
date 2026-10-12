@@ -6,15 +6,19 @@ import {
   DocumentsProvider,
   DocumentsScreen,
 } from '@/features/documents';
+import { createNotificationsSource, NotificationsProvider } from '@/features/notifications';
 
 const repository = createDocumentsRepository();
+const notificationsSource = createNotificationsSource();
 
 export default function App() {
   return (
     <SafeAreaProvider>
       <DocumentsProvider repository={repository}>
-        <DocumentsScreen />
-        <StatusBar style="auto" />
+        <NotificationsProvider source={notificationsSource}>
+          <DocumentsScreen />
+          <StatusBar style="auto" />
+        </NotificationsProvider>
       </DocumentsProvider>
     </SafeAreaProvider>
   );

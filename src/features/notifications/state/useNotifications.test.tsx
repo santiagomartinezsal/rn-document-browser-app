@@ -56,7 +56,7 @@ describe('useNotifications', () => {
     expect(result.current.unreadCount).toBe(1);
   });
 
-  it('resets unreadCount but keeps items when markAllRead is called', async () => {
+  it('resets unreadCount but keeps items when openPanel is called', async () => {
     let emit: ((notification: Notification) => void) | undefined;
     const source = buildSource({
       subscribe: jest.fn((onNotification) => {
@@ -69,11 +69,46 @@ describe('useNotifications', () => {
       emit?.(sampleNotification);
     });
     await act(() => {
-      result.current.markAllRead();
+      result.current.openPanel();
     });
 
     expect(result.current.items).toEqual([sampleNotification]);
     expect(result.current.unreadCount).toBe(0);
+    expect(result.current.isPanelOpen).toBe(true);
+  });
+
+  it('does not increment unreadCount for a notification received while the panel is open', async () => {
+    let emit: ((notification: Notification) => void) | undefined;
+    const source = buildSource({
+      subscribe: jest.fn((onNotification) => {
+        emit = onNotification;
+      }),
+    });
+    const { result } = await renderWithSource(source);
+
+    await act(() => {
+      result.current.openPanel();
+    });
+    await act(() => {
+      emit?.(sampleNotification);
+    });
+
+    expect(result.current.items).toEqual([sampleNotification]);
+    expect(result.current.unreadCount).toBe(0);
+  });
+
+  it('closes the panel when closePanel is called', async () => {
+    const source = buildSource();
+    const { result } = await renderWithSource(source);
+
+    await act(() => {
+      result.current.openPanel();
+    });
+    await act(() => {
+      result.current.closePanel();
+    });
+
+    expect(result.current.isPanelOpen).toBe(false);
   });
 
   it('stops the source on unmount', async () => {

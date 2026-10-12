@@ -15,7 +15,7 @@ describe('notificationsReducer', () => {
       notification: sampleNotification,
     });
 
-    expect(state).toEqual({ items: [sampleNotification], unreadCount: 1 });
+    expect(state).toEqual({ items: [sampleNotification], unreadCount: 1, isPanelOpen: false });
   });
 
   it('keeps earlier notifications when another one is received', () => {
@@ -33,17 +33,37 @@ describe('notificationsReducer', () => {
     expect(state).toEqual({
       items: [secondNotification, sampleNotification],
       unreadCount: 2,
+      isPanelOpen: false,
     });
   });
 
-  it('resets unreadCount to 0 on NOTIFICATIONS_READ without touching items', () => {
+  it('does not increment unreadCount for a notification received while the panel is open', () => {
+    const openState = notificationsReducer(initialNotificationsState, { type: 'PANEL_OPENED' });
+
+    const state = notificationsReducer(openState, {
+      type: 'NOTIFICATION_RECEIVED',
+      notification: sampleNotification,
+    });
+
+    expect(state).toEqual({ items: [sampleNotification], unreadCount: 0, isPanelOpen: true });
+  });
+
+  it('opens the panel and resets unreadCount to 0 on PANEL_OPENED', () => {
     const receivedState = notificationsReducer(initialNotificationsState, {
       type: 'NOTIFICATION_RECEIVED',
       notification: sampleNotification,
     });
 
-    const state = notificationsReducer(receivedState, { type: 'NOTIFICATIONS_READ' });
+    const state = notificationsReducer(receivedState, { type: 'PANEL_OPENED' });
 
-    expect(state).toEqual({ items: [sampleNotification], unreadCount: 0 });
+    expect(state).toEqual({ items: [sampleNotification], unreadCount: 0, isPanelOpen: true });
+  });
+
+  it('closes the panel on PANEL_CLOSED without touching items or unreadCount', () => {
+    const openState = notificationsReducer(initialNotificationsState, { type: 'PANEL_OPENED' });
+
+    const state = notificationsReducer(openState, { type: 'PANEL_CLOSED' });
+
+    expect(state).toEqual({ items: [], unreadCount: 0, isPanelOpen: false });
   });
 });

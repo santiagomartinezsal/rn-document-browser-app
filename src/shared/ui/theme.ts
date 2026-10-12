@@ -23,6 +23,7 @@ export const fontSize = {
 
 export const iconSize = {
   sm: 14,
+  md: 22,
 } as const;
 
 export const borderRadius = {

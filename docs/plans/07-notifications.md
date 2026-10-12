@@ -170,7 +170,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     hidden at `unreadCount={0}`; badge shows the count when `>0`; `onPress`
     fires on press.
 
-- [ ] **6. `feat(notifications): add notifications panel`**
+- [x] **6. `feat(notifications): add notifications panel`**
   - `src/features/notifications/ui/NotificationsPanel.tsx` — RN `Modal`
     (same bottom-sheet shape as `AddDocumentModal.tsx`: `transparent`,
     `animationType="slide"`, `onRequestClose={onClose}`), listing `items`
