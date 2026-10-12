@@ -3,7 +3,6 @@ import { FlatList, Text, View } from 'react-native';
 import type { Document } from '../domain/document';
 import { useDocuments } from '../state/useDocuments';
 
-
 function DocumentRow({ document }: { document: Document }) {
   return (
     <View testID={`document-${document.id}`}>
@@ -11,7 +10,6 @@ function DocumentRow({ document }: { document: Document }) {
     </View>
   );
 }
-
 
 export function DocumentsScreen() {
   const state = useDocuments();

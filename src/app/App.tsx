@@ -1,20 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+
+import {
+  createDocumentsRepository,
+  DocumentsProvider,
+  DocumentsScreen,
+} from '@/features/documents';
+
+const repository = createDocumentsRepository();
 
 export default function App() {
   return (
-    <View style={styles.container} testID="app-root">
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <DocumentsProvider repository={repository}>
+      <DocumentsScreen />
       <StatusBar style="auto" />
-    </View>
+    </DocumentsProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
