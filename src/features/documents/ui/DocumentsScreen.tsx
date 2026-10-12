@@ -1,10 +1,20 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { borderRadius, colors, spacing } from '@/shared/ui/theme';
+import { borderRadius, colors, fontSize, spacing } from '@/shared/ui/theme';
 
 import type { Document } from '../domain/document';
+import type { DocumentsState } from '../state/documentsReducer';
 import { useDocuments } from '../state/useDocuments';
 import { DocumentCard } from './DocumentCard';
+
+function Header() {
+  return (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>Documents</Text>
+    </View>
+  );
+}
 
 function LoadingState() {
   return (
@@ -51,9 +61,7 @@ function DocumentList({ documents }: { documents: Document[] }) {
   );
 }
 
-export function DocumentsScreen() {
-  const { state, retry } = useDocuments();
-
+function DocumentsBody({ state, retry }: { state: DocumentsState; retry: () => void }) {
   if (state.status === 'error') {
     return <ErrorState message={state.message} onRetry={retry} />;
   }
@@ -69,7 +77,30 @@ export function DocumentsScreen() {
   return <DocumentList documents={state.documents} />;
 }
 
+export function DocumentsScreen() {
+  const { state, retry } = useDocuments();
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <Header />
+      <DocumentsBody state={state} retry={retry} />
+    </SafeAreaView>
+  );
+}
+
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+  },
+  headerTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
   centered: {
     flex: 1,
     alignItems: 'center',

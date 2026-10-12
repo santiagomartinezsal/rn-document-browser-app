@@ -15,6 +15,7 @@ export const spacing = {
 export const fontSize = {
   sm: 13,
   md: 17,
+  lg: 28,
 } as const;
 
 export const iconSize = {

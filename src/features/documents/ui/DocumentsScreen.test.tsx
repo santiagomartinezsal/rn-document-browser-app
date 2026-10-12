@@ -63,6 +63,17 @@ describe('DocumentsScreen', () => {
     expect(await screen.findByText('First Document')).toBeOnTheScreen();
   });
 
+  it('shows the "Documents" header while still loading', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockReturnValue(new Promise<Document[]>(() => {})),
+    };
+
+    await renderScreen(repository);
+
+    expect(screen.getByText('Documents')).toBeOnTheScreen();
+    expect(screen.getByTestId('documents-loading')).toBeOnTheScreen();
+  });
+
   it('shows an error message and a retry button when the repository rejects', async () => {
     const repository: DocumentsRepository = {
       getAll: jest.fn().mockRejectedValue(new Error('network down')),

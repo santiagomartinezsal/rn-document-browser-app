@@ -44,7 +44,7 @@ library is bundled in Expo Go for SDK 57 — no dev build required.
     branch kept its existing testID/content, so this was a structural refactor, not a behavior
     change — `DocumentsScreen.test.tsx`'s existing assertions passed unmodified.
 
-- [] **2. "Documents" header**
+- [x] **2. "Documents" header**
   - `src/shared/ui/theme.ts` — added `fontSize.lg: 28` (the scale was only `sm: 13, md: 17`; the
     mockup's title is visually much larger/bolder than either).
   - `src/features/documents/ui/DocumentsScreen.tsx` — added a local `Header` function (same
