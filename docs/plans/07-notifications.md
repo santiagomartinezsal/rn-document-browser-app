@@ -159,7 +159,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     `ws://` endpoint, and other alternatives). `CLAUDE.md`'s architecture
     line updated to match.
 
-- [ ] **5. `feat(notifications): add bell with unread badge`**
+- [x] **5. `feat(notifications): add bell with unread badge`**
   - `src/features/notifications/ui/NotificationBell.tsx` — presentational,
     `{ unreadCount, onPress }` props (no context coupling, so it's testable
     standalone): `Feather name="bell"` + a small badge `View`/`Text`
