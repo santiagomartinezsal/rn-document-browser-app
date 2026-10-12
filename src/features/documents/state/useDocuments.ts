@@ -6,11 +6,17 @@ import { useDocumentsRepository } from './DocumentsRepositoryContext';
 import { documentsReducer, initialDocumentsState } from './documentsReducer';
 import type { DocumentsState } from './documentsReducer';
 
+export type ViewMode = 'list' | 'grid';
+
+const DEFAULT_VIEW_MODE: ViewMode = 'list';
+
 export interface UseDocumentsResult {
   state: DocumentsState;
   retry: () => void;
   sortBy: SortKey;
   setSortBy: (sortBy: SortKey) => void;
+  viewMode: ViewMode;
+  setViewMode: (viewMode: ViewMode) => void;
 }
 
 export function useDocuments(): UseDocumentsResult {
@@ -18,6 +24,7 @@ export function useDocuments(): UseDocumentsResult {
   const [state, dispatch] = useReducer(documentsReducer, initialDocumentsState);
   const [fetchAttempt, setFetchAttempt] = useState(0);
   const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT_KEY);
+  const [viewMode, setViewMode] = useState<ViewMode>(DEFAULT_VIEW_MODE);
 
   const retry = () => {
     setFetchAttempt((previousAttempt) => previousAttempt + 1);
@@ -47,7 +54,7 @@ export function useDocuments(): UseDocumentsResult {
     };
   }, [repository, fetchAttempt]);
 
-  return { state, retry, sortBy, setSortBy };
+  return { state, retry, sortBy, setSortBy, viewMode, setViewMode };
 }
 
 function toErrorMessage(error: unknown): string {

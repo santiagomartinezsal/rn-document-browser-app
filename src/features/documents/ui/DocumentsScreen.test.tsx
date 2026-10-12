@@ -86,7 +86,7 @@ describe('DocumentsScreen', () => {
     });
   });
 
-  it('selects the grid segment when pressed', async () => {
+  it('shows the grid and hides the list when the grid segment is pressed', async () => {
     const repository: DocumentsRepository = {
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
     };
@@ -99,6 +99,24 @@ describe('DocumentsScreen', () => {
     expect(screen.getByTestId('view-mode-button-grid').props.accessibilityState).toEqual({
       selected: true,
     });
+    expect(screen.getByTestId('document-grid-doc-1')).toBeOnTheScreen();
+    expect(screen.queryByTestId('documents-list')).not.toBeOnTheScreen();
+  });
+
+  it('shows the list again when the list segment is pressed after switching to grid', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    await renderScreen(repository);
+    await screen.findByText('First Document');
+
+    await fireEvent.press(screen.getByTestId('view-mode-button-grid'));
+    await screen.findByTestId('document-grid-doc-1');
+    await fireEvent.press(screen.getByTestId('view-mode-button-list'));
+
+    expect(screen.getByTestId('documents-list')).toBeOnTheScreen();
+    expect(screen.queryByTestId('document-grid-doc-1')).not.toBeOnTheScreen();
   });
 
   it('shows a loading state before the repository resolves', async () => {

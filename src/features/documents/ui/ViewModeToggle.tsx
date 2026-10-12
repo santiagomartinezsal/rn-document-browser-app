@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { borderRadius, colors, iconSize, spacing } from '@/shared/ui/theme';
 
-export type ViewMode = 'list' | 'grid';
+import type { ViewMode } from '../state/useDocuments';
 
 export interface ViewModeToggleProps {
   selected: ViewMode;

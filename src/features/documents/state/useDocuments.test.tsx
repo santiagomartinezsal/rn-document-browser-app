@@ -131,4 +131,55 @@ describe('useDocuments', () => {
     });
     expect(result.current.sortBy).toBe('title');
   });
+
+  it('defaults viewMode to list', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    const { result } = await renderWithRepository(repository);
+
+    expect(result.current.viewMode).toBe('list');
+  });
+
+  it('updates viewMode when setViewMode is called', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    const { result } = await renderWithRepository(repository);
+
+    await act(() => {
+      result.current.setViewMode('grid');
+    });
+
+    expect(result.current.viewMode).toBe('grid');
+  });
+
+  it('preserves viewMode across a retry that refetches documents', async () => {
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(sampleDocuments);
+    const repository: DocumentsRepository = { getAll };
+
+    const { result } = await renderWithRepository(repository);
+
+    await act(() => {
+      result.current.setViewMode('grid');
+    });
+
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'error', message: 'network down' });
+    });
+
+    await act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
+    });
+    expect(result.current.viewMode).toBe('grid');
+  });
 });

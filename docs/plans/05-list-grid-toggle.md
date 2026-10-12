@@ -12,9 +12,20 @@ Contributors/Attachments). This was explicitly deferred in `docs/plans/02-docume
 Commit order is outside-in rather than bottom-up: the toggle control is built and placed in the
 screen first — interactive via its own local state, but not yet changing what the list renders —
 so it's checkable by running the app from the very first commit, not just by unit tests. The next
-commit lifts that state into `useDocuments` and wires it to a placeholder grid state, and only
-after that is the real grid card content built to replace the placeholder. Each step leaves the
-app in a runnable, visually-checkable state.
+commit lifts that state into `useDocuments` and wires it to a `DocumentGrid` stub, and only
+after that is the real grid content built to fill that stub in. Each step leaves the app in a
+runnable, visually-checkable state.
+
+Deviation from the original brief's "grid and list share one FlatList": `DocumentGrid` gets its
+own `FlatList` (`numColumns={2}`) rather than `DocumentList`'s single `FlatList` switching props
+on `viewMode`. Decided explicitly after weighing both: a single shared `FlatList` concentrates
+`numColumns`/`columnWrapperStyle`/`contentContainerStyle`/`renderItem` branching in one place and
+needs a `key={viewMode}` remount trick, since React Native doesn't support changing `numColumns`
+on a live `FlatList` instance. Two single-purpose `FlatList`s sidestep that gotcha for free (each
+one is a distinct element under the `viewMode` conditional, so switching between them already
+unmounts/remounts) at the cost of some duplicated list plumbing (`data`/`keyExtractor`/`testID`)
+between `DocumentList` and `DocumentGrid` — accepted since it's two call sites, not duplication
+worth abstracting yet.
 
 ## Commits
 
@@ -44,7 +55,7 @@ app in a runnable, visually-checkable state.
     list selected by default; pressing the grid segment selects it (both via `accessibilityState`,
     not list content, since content doesn't change yet).
 
-- [ ] **2. Lift view mode state into `useDocuments` and wire a grid placeholder**
+- [x] **2. Lift view mode state into `useDocuments` and wire a grid placeholder**
   - `src/features/documents/state/useDocuments.ts` — add `export type ViewMode = 'list' | 'grid'`
     and `const DEFAULT_VIEW_MODE: ViewMode = 'list'`. `ViewMode` lives here, not in `domain/`,
     because it's a UI presentation concern (unlike `SortKey`, which affects ordering the domain
@@ -58,18 +69,19 @@ app in a runnable, visually-checkable state.
   - `src/features/documents/ui/DocumentsScreen.tsx` — replace `DocumentsBody`'s local `viewMode`
     `useState` with `viewMode`/`setViewMode` from `useDocuments()`, removing the temporary comment.
     `DocumentsBody` branches on `viewMode`: `'list'` renders the existing `DocumentList`/`FlatList`
-    unchanged; `'grid'` renders a small local `GridPlaceholder` (`testID="documents-grid-placeholder"`,
-    simple centered text, same local-function pattern as the file's existing
-    `LoadingState`/`EmptyState`) standing in for the not-yet-built grid content. This is a
-    deliberately temporary branch, replaced in commit 3 once `DocumentGridCard` exists.
+    unchanged; `'grid'` renders `DocumentGrid`.
+  - `src/features/documents/ui/DocumentGrid.tsx` (new) — the grid's permanent home from the start,
+    rather than a throwaway inline placeholder function: currently an empty stub
+    (`testID="documents-grid-placeholder"`, no content), filled in with the real 2-column grid in
+    commit 3. `src/features/documents/ui/DocumentGrid.test.tsx` (new) — asserts it renders.
   - `src/features/documents/ui/DocumentsScreen.test.tsx` — extend the two toggle tests from commit
     1 (or add new ones) to also assert content: pressing `view-mode-button-grid` shows
     `documents-grid-placeholder` and hides the list content; pressing `view-mode-button-list` after
     that reverts to the list. This is the "component test for toggling" the milestone asked for —
-    it passes before the real grid card exists, and keeps passing with updated assertions after
-    commit 3 swaps the placeholder for real content.
+    it passes before the real grid content exists, and keeps passing with updated assertions after
+    commit 3 fills `DocumentGrid` in.
 
-- [ ] **3. Build the real grid view**
+- [x] **3. Build the real grid view**
   - `src/features/documents/ui/DocumentGridCard.tsx` (new) — `DocumentGridCardProps { document: Document }`.
     Root `View` with `testID={\`document-grid-${document.id}\`}`, rendering only the title
     (`numberOfLines={1}`, bold) and `Version {document.version}` (gray, smaller), stacked — no
@@ -82,16 +94,28 @@ app in a runnable, visually-checkable state.
   - `src/features/documents/ui/DocumentGridCard.test.tsx` (new) — same `buildDocument` helper
     pattern as `DocumentCard.test.tsx`. Asserts the testID, title, and version render; asserts
     `queryByText('Contributors')`/`queryByText('Attachments')` are absent.
-  - `src/features/documents/ui/DocumentsScreen.tsx` — remove `GridPlaceholder`; per the milestone's
-    "share one FlatList," `DocumentList` becomes a single `<FlatList>` whose props switch on
-    `viewMode` (`numColumns`, `columnWrapperStyle`, `contentContainerStyle`, and `renderItem`
-    choosing `DocumentGridCard` vs `DocumentCard`) rather than two near-duplicate lists or a
-    separate placeholder branch. `key={viewMode}` is added to the `FlatList` — React Native
-    requires a remount when `numColumns` changes at runtime, and switching the `key` forces that
-    remount cheaply (no refetch, `fetchAttempt` untouched). New styles `gridRow: { gap: spacing.md }`
-    (via `columnWrapperStyle`) and `gridContent: { padding: spacing.lg, gap: spacing.md }` (via
-    `contentContainerStyle`) use RN's `gap` support (present since RN 0.71, well within Expo SDK
-    57's RN version) instead of hand-rolled margins. `testID="documents-list"` is unchanged.
+  - `src/features/documents/ui/DocumentGrid.tsx` — filled in: takes `{ documents: Document[] }`,
+    renders its own `<FlatList testID="documents-grid-list" numColumns={2} data={documents}
+    keyExtractor={(document) => document.id} renderItem={({ item }) => <DocumentGridCard
+    document={item} />} columnWrapperStyle={styles.row}
+    contentContainerStyle={styles.listContent} />`. No `key` remount trick needed — `numColumns`
+    is permanently `2` on this `FlatList`, it never changes at runtime; `DocumentGrid` as a whole
+    mounts/unmounts when `viewMode` flips. `listContent: { padding: spacing.lg, gap: spacing.md }`
+    (vertical gap between rows, via `contentContainerStyle`) uses RN's `gap` support. The row's
+    *horizontal* spacing does **not** use `gap`, though: an initial `columnWrapperStyle: { gap:
+    spacing.md }` + `flex: 1` card made an odd-count last row's lone card stretch to fill the
+    whole row (no sibling to share the `flex: 1` split with). A follow-up fix — padding the data
+    with an invisible `flex: 1` filler item so every row always has two flex children — still came
+    out wrong (the lone card ended up wider than its siblings by roughly the gap). Both attempts
+    are reverted; the shipped fix gives `DocumentGridCard` a fixed `width: '48%'` (a one-line
+    comment notes it approximates `50% - gap/2`, since confirmed against the RN 0.86 docs that
+    `StyleSheet` has no `calc()`) and `row: { justifyContent: 'space-between' }` instead of `gap`
+    — a fixed width doesn't depend on row siblings at all, so a lone card just sits at 48% with
+    blank space after it.
+  - `src/features/documents/ui/DocumentGrid.test.tsx` — updated to pass `documents`, asserting the
+    grid cards render (and the list card's Contributors/Attachments content doesn't).
+  - `src/features/documents/ui/DocumentsScreen.tsx` — pass `documents={sortDocuments(state.documents, sortBy)}`
+    into `<DocumentGrid documents={...} />`, mirroring how `DocumentList` is already called.
   - `src/features/documents/ui/DocumentsScreen.test.tsx` — update the two toggle tests from commit
     2 to assert `document-grid-doc-1` (and real title/version content) instead of the placeholder
     testID.

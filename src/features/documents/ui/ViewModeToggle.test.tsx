@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import type { ViewMode } from './ViewModeToggle';
+import type { ViewMode } from '../state/useDocuments';
 import { ViewModeToggle } from './ViewModeToggle';
 
 function renderToggle(selected: ViewMode, onChange: (viewMode: ViewMode) => void) {
