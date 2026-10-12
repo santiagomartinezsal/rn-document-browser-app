@@ -3,6 +3,8 @@ export const colors = {
   textSecondary: '#6B7280',
   surface: '#FFFFFF',
   background: '#F3F4F6',
+  accent: '#2563EB',
+  border: '#E5E7EB',
 } as const;
 
 export const spacing = {

@@ -96,3 +96,14 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
   - React Native core's own `SafeAreaView`: iOS-only (a no-op on Android), and effectively
     deprecated in favor of this library — wouldn't actually handle the Android case this app
     targets.
+- Sorting: `compareVersions` and `sortDocuments` are plain functions in `domain/`, not inlined in
+  the screen or the reducer — they're pure, so they're tested directly with no component/hook
+  rendering. Each `SortKey` (date, title, version) has one fixed direction (newest, A→Z, highest)
+  instead of an independent ascending/descending toggle, since the mockup's "Sort by" control
+  doesn't show one and a toggle would double the menu's states for no requirement asked for.
+  `useDocuments` tracks the active `sortBy` as its own `useState`, separate from the fetch
+  reducer's `idle | loading | success | error` state — sort preference and fetch status are
+  unrelated, and nesting `sortBy` inside the `success` variant would reset it to the default on
+  every `retry()`/refetch, silently discarding the user's choice. `SortMenu`'s dropdown is a plain
+  RN `Modal` + `Pressable` list (no new dependency); the mockup doesn't show the open state, so its
+  look is a judgement call using the existing theme tokens.

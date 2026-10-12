@@ -34,6 +34,10 @@ function renderScreen(repository: DocumentsRepository) {
   );
 }
 
+function getRenderedDocumentIds(): string[] {
+  return screen.getAllByTestId(/^document-/).map((card) => card.props.testID as string);
+}
+
 describe('DocumentsScreen', () => {
   it('shows each document title once the repository resolves', async () => {
     const repository: DocumentsRepository = {
@@ -44,6 +48,26 @@ describe('DocumentsScreen', () => {
 
     expect(await screen.findByText('First Document')).toBeOnTheScreen();
     expect(screen.getByText('Second Document')).toBeOnTheScreen();
+  });
+
+  it('shows the sort menu and re-sorts the list when a different option is picked', async () => {
+    const documentsWithMismatchedDateAndTitleOrder: Document[] = [
+      { ...sampleDocuments[0], title: 'Zebra', updatedAt: '2024-01-02T00:00:00Z' },
+      { ...sampleDocuments[1], title: 'Apple', updatedAt: '2024-01-01T00:00:00Z' },
+    ];
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(documentsWithMismatchedDateAndTitleOrder),
+    };
+
+    await renderScreen(repository);
+    await screen.findByText('Zebra');
+
+    expect(getRenderedDocumentIds()).toEqual(['document-doc-1', 'document-doc-2']);
+
+    await fireEvent.press(screen.getByTestId('sort-menu-button'));
+    await fireEvent.press(screen.getByTestId('sort-menu-option-title'));
+
+    expect(getRenderedDocumentIds()).toEqual(['document-doc-2', 'document-doc-1']);
   });
 
   it('shows a loading state before the repository resolves', async () => {

@@ -73,8 +73,8 @@ Design decisions:
     `retry()` that refetches (reject-then-resolve), proving the bug above
     doesn't recur.
 
-- [ ] **4. `SortMenu` UI, wired into `DocumentsScreen`**
-  - `src/shared/ui/theme.ts` — add `colors.primary` (accent, e.g.
+- [x] **4. `SortMenu` UI, wired into `DocumentsScreen`**
+  - `src/shared/ui/theme.ts` — add `colors.accent` (e.g.
     `#2563EB`) for the selected option/active state, and `colors.border`
     (e.g. `#E5E7EB`) for the pill outline — neither exists yet and both are
     needed for the mockup's "Sort by" pill.
@@ -87,7 +87,7 @@ Design decisions:
     "Sort by" trigger (local `useState` for open/closed — presentational UI
     state, stays local rather than going through the reducer) opens a plain
     RN `Modal` listing the three `SortKey` options; the selected one is
-    highlighted with `colors.primary`.
+    highlighted with `colors.accent`.
   - `src/features/documents/ui/DocumentsScreen.tsx` — destructure
     `sortBy`/`setSortBy` from `useDocuments()`; on the `success` branch,
     derive `sortDocuments(state.documents, sortBy)` and render `<SortMenu

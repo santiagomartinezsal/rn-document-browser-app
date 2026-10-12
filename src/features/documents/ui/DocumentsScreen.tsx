@@ -4,9 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { borderRadius, colors, fontSize, spacing } from '@/shared/ui/theme';
 
 import type { Document } from '../domain/document';
-import type { DocumentsState } from '../state/documentsReducer';
+import { sortDocuments } from '../domain/sortDocuments';
 import { useDocuments } from '../state/useDocuments';
 import { DocumentCard } from './DocumentCard';
+import { SortMenu } from './SortMenu';
 
 function Header() {
   return (
@@ -61,7 +62,9 @@ function DocumentList({ documents }: { documents: Document[] }) {
   );
 }
 
-function DocumentsBody({ state, retry }: { state: DocumentsState; retry: () => void }) {
+function DocumentsBody() {
+  const { state, retry, sortBy, setSortBy } = useDocuments();
+
   if (state.status === 'error') {
     return <ErrorState message={state.message} onRetry={retry} />;
   }
@@ -74,16 +77,21 @@ function DocumentsBody({ state, retry }: { state: DocumentsState; retry: () => v
     return <EmptyState />;
   }
 
-  return <DocumentList documents={state.documents} />;
+  return (
+    <View style={styles.body}>
+      <View style={styles.toolbar}>
+        <SortMenu selected={sortBy} onChange={setSortBy} />
+      </View>
+      <DocumentList documents={sortDocuments(state.documents, sortBy)} />
+    </View>
+  );
 }
 
 export function DocumentsScreen() {
-  const { state, retry } = useDocuments();
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <Header />
-      <DocumentsBody state={state} retry={retry} />
+      <DocumentsBody />
     </SafeAreaView>
   );
 }
@@ -100,6 +108,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lg,
     fontWeight: '700',
     color: colors.textPrimary,
+  },
+  body: {
+    flex: 1,
+  },
+  toolbar: {
+    flexDirection: 'row',
+    padding: spacing.lg,
+    backgroundColor: colors.background,
   },
   centered: {
     flex: 1,
