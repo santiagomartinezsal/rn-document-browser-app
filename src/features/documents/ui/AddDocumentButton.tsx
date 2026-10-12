@@ -1,6 +1,6 @@
-import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
+import { Icon } from '@/shared/ui/Icon';
 import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 export interface AddDocumentButtonProps {
@@ -15,7 +15,7 @@ export function AddDocumentButton({ onPress }: AddDocumentButtonProps) {
       onPress={onPress}
       style={styles.button}
     >
-      <Feather name="plus" size={iconSize.sm} color={colors.surface} />
+      <Icon name="plus" size={iconSize.sm} color={colors.surface} />
       <Text style={styles.text}>Add document</Text>
     </Pressable>
   );

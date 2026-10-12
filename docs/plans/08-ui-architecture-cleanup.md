@@ -85,7 +85,7 @@ Verified repo state: working tree clean on `main`
   - `SortMenu.tsx` stays as-is — its centered popover is a different shape,
     not a bottom sheet.
 
-- [ ] **3. `refactor(shared): add an Icon wrapper over the icon library`**
+- [x] **3. `refactor(shared): add an Icon wrapper over the icon library`**
   - `src/shared/ui/Icon.tsx` (new) — `export type IconName =
     ComponentProps<typeof Feather>['name']`; `Icon({ name, size, color }:
     { name: IconName; size: number; color: string })` rendering `<Feather

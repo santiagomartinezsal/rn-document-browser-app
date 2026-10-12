@@ -1,7 +1,7 @@
-import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Icon } from '@/shared/ui/Icon';
 import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 import type { SortKey } from '../domain/sortDocuments';
@@ -34,7 +34,7 @@ export function SortMenu({ selected, onChange }: SortMenuProps) {
         style={styles.trigger}
       >
         <Text style={styles.triggerText}>Sort by</Text>
-        <Feather name="chevron-down" size={iconSize.sm} color={colors.textSecondary} />
+        <Icon name="chevron-down" size={iconSize.sm} color={colors.textSecondary} />
       </Pressable>
 
       <Modal
@@ -62,7 +62,7 @@ export function SortMenu({ selected, onChange }: SortMenuProps) {
                   <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
                     {option.label}
                   </Text>
-                  {isSelected && <Feather name="check" size={iconSize.sm} color={colors.accent} />}
+                  {isSelected && <Icon name="check" size={iconSize.sm} color={colors.accent} />}
                 </Pressable>
               );
             })}

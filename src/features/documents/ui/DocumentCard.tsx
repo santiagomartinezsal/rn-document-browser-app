@@ -1,6 +1,6 @@
-import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Icon } from '@/shared/ui/Icon';
 import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 import type { Document } from '../domain/document';
@@ -21,7 +21,7 @@ export function DocumentCard({ document }: DocumentCardProps) {
       <View style={styles.columns}>
         <View style={styles.column}>
           <View style={styles.columnLabel}>
-            <Feather name="users" size={iconSize.sm} color={colors.textSecondary} />
+            <Icon name="users" size={iconSize.sm} color={colors.textSecondary} />
             <Text style={styles.columnLabelText}>Contributors</Text>
           </View>
           {document.contributors.map((contributor) => (
@@ -32,7 +32,7 @@ export function DocumentCard({ document }: DocumentCardProps) {
         </View>
         <View style={styles.column}>
           <View style={styles.columnLabel}>
-            <Feather name="link" size={iconSize.sm} color={colors.textSecondary} />
+            <Icon name="link" size={iconSize.sm} color={colors.textSecondary} />
             <Text style={styles.columnLabelText}>Attachments</Text>
           </View>
           {document.attachments.map((attachment, index) => (

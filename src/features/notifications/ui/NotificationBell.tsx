@@ -1,6 +1,6 @@
-import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Icon } from '@/shared/ui/Icon';
 import { colors, iconSize, spacing } from '@/shared/ui/theme';
 
 const MAX_DISPLAYED_UNREAD_COUNT = 99;
@@ -27,7 +27,7 @@ export function NotificationBell({ unreadCount, onPress }: NotificationBellProps
       onPress={onPress}
       style={styles.button}
     >
-      <Feather name="bell" size={iconSize.md} color={colors.textPrimary} />
+      <Icon name="bell" size={iconSize.md} color={colors.textPrimary} />
       {unreadCount > 0 && (
         <View testID="notification-bell-badge" style={styles.badge}>
           <Text style={styles.badgeText}>{formatUnreadCount(unreadCount)}</Text>

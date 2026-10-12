@@ -1,7 +1,7 @@
-import { Feather } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Icon } from '@/shared/ui/Icon';
 import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 export interface BottomSheetModalProps {
@@ -27,7 +27,7 @@ export function BottomSheetModal({
           <View style={styles.header}>
             <Text style={styles.headerTitle}>{title}</Text>
             <Pressable testID={closeButtonTestID} accessibilityRole="button" onPress={onClose}>
-              <Feather name="x" size={iconSize.sm} color={colors.textSecondary} />
+              <Icon name="x" size={iconSize.sm} color={colors.textSecondary} />
             </Pressable>
           </View>
           {children}

@@ -1,10 +1,10 @@
-import { Feather } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BottomSheetModal } from '@/shared/ui/BottomSheetModal';
+import { Icon } from '@/shared/ui/Icon';
 import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 import type { CreateDocumentInput } from '../domain/document';
@@ -112,7 +112,7 @@ export function AddDocumentModal({ visible, onClose, onSubmit }: AddDocumentModa
           onPress={() => void pickFile()}
           style={styles.chooseFileButton}
         >
-          <Feather name="file-text" size={iconSize.sm} color={colors.accent} />
+          <Icon name="file-text" size={iconSize.sm} color={colors.accent} />
           <Text style={styles.chooseFileText}>
             {fileName ? truncateFileName(fileName) : 'Choose file'}
           </Text>

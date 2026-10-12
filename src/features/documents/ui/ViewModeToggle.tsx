@@ -1,6 +1,7 @@
-import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Icon } from '@/shared/ui/Icon';
+import type { IconName } from '@/shared/ui/Icon';
 import { borderRadius, colors, iconSize, spacing } from '@/shared/ui/theme';
 
 import type { ViewMode } from '../state/useDocuments';
@@ -9,6 +10,11 @@ export interface ViewModeToggleProps {
   selected: ViewMode;
   onChange: (viewMode: ViewMode) => void;
 }
+
+const VIEW_MODE_ICON: Record<ViewMode, IconName> = {
+  list: 'list',
+  grid: 'grid',
+};
 
 function ViewModeButton({ mode, selected, onChange }: ViewModeToggleProps & { mode: ViewMode }) {
   const isSelected = mode === selected;
@@ -21,8 +27,8 @@ function ViewModeButton({ mode, selected, onChange }: ViewModeToggleProps & { mo
       onPress={() => onChange(mode)}
       style={[styles.segment, isSelected && styles.segmentSelected]}
     >
-      <Feather
-        name={mode}
+      <Icon
+        name={VIEW_MODE_ICON[mode]}
         size={iconSize.sm}
         color={isSelected ? colors.accent : colors.textSecondary}
       />
