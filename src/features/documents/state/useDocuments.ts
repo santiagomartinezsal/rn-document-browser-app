@@ -1,5 +1,7 @@
 import { useEffect, useReducer, useState } from 'react';
 
+import { DEFAULT_SORT_KEY } from '../domain/sortDocuments';
+import type { SortKey } from '../domain/sortDocuments';
 import { useDocumentsRepository } from './DocumentsRepositoryContext';
 import { documentsReducer, initialDocumentsState } from './documentsReducer';
 import type { DocumentsState } from './documentsReducer';
@@ -7,12 +9,15 @@ import type { DocumentsState } from './documentsReducer';
 export interface UseDocumentsResult {
   state: DocumentsState;
   retry: () => void;
+  sortBy: SortKey;
+  setSortBy: (sortBy: SortKey) => void;
 }
 
 export function useDocuments(): UseDocumentsResult {
   const repository = useDocumentsRepository();
   const [state, dispatch] = useReducer(documentsReducer, initialDocumentsState);
   const [fetchAttempt, setFetchAttempt] = useState(0);
+  const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT_KEY);
 
   const retry = () => {
     setFetchAttempt((previousAttempt) => previousAttempt + 1);
@@ -42,7 +47,7 @@ export function useDocuments(): UseDocumentsResult {
     };
   }, [repository, fetchAttempt]);
 
-  return { state, retry };
+  return { state, retry, sortBy, setSortBy };
 }
 
 function toErrorMessage(error: unknown): string {

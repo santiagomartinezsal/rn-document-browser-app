@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import type { Document } from '../domain/document';
 import type { DocumentsRepository } from '../domain/documentsRepository';
+import { DEFAULT_SORT_KEY } from '../domain/sortDocuments';
 import { DocumentsProvider } from './DocumentsRepositoryContext';
 import { useDocuments } from './useDocuments';
 
@@ -78,5 +79,56 @@ describe('useDocuments', () => {
     await expect(renderHook(() => useDocuments())).rejects.toThrow(
       'useDocumentsRepository must be used within a DocumentsProvider',
     );
+  });
+
+  it('defaults sortBy to DEFAULT_SORT_KEY', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    const { result } = await renderWithRepository(repository);
+
+    expect(result.current.sortBy).toBe(DEFAULT_SORT_KEY);
+  });
+
+  it('updates sortBy when setSortBy is called', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    const { result } = await renderWithRepository(repository);
+
+    await act(() => {
+      result.current.setSortBy('title');
+    });
+
+    expect(result.current.sortBy).toBe('title');
+  });
+
+  it('preserves sortBy across a retry that refetches documents', async () => {
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(sampleDocuments);
+    const repository: DocumentsRepository = { getAll };
+
+    const { result } = await renderWithRepository(repository);
+
+    await act(() => {
+      result.current.setSortBy('title');
+    });
+
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'error', message: 'network down' });
+    });
+
+    await act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
+    });
+    expect(result.current.sortBy).toBe('title');
   });
 });

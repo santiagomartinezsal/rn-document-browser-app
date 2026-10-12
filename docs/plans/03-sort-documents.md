@@ -55,21 +55,23 @@ Design decisions:
     missing/empty/unparseable → falls back to `createdAt`); small inline
     sample arrays, matching `documentsReducer.test.ts`'s style.
 
-- [ ] **3. Wire sort state into the reducer and hook**
-  - `src/features/documents/state/documentsReducer.ts` — add `sortBy:
-    SortKey` to the `success` state variant; add action `{ type:
-    'SORT_CHANGED'; sortBy: SortKey }`. `FETCH_SUCCEEDED` sets `sortBy:
-    DEFAULT_SORT_KEY` (a fresh fetch resets to the default). `SORT_CHANGED`
-    updates `sortBy` when `state.status === 'success'`, a no-op otherwise.
-  - `src/features/documents/state/documentsReducer.test.ts` — update the
-    `FETCH_SUCCEEDED` assertions for the new `sortBy` field; add cases for
-    `SORT_CHANGED` (changes `sortBy` from a success state; ignored from
-    `loading`/`error`/`idle`).
+- [x] **3. Track sort preference in `useDocuments`**
+  - `documentsReducer.ts` is untouched — fetch status and sort preference
+    are orthogonal, so sort state doesn't live there. (Originally planned
+    as a `sortBy` field on the `success` variant plus a `SORT_CHANGED`
+    action; reverted because `FETCH_SUCCEEDED` would then reset `sortBy` to
+    the default on every refetch, silently discarding whatever the user
+    had picked — e.g. after a `retry()`.)
   - `src/features/documents/state/useDocuments.ts` — add
-    `setSortBy(sortBy: SortKey): void` to `UseDocumentsResult`, dispatching
-    `SORT_CHANGED`.
-  - `src/features/documents/state/useDocuments.test.tsx` — update for the
-    new return field/behavior.
+    `const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT_KEY)`,
+    independent of the fetch reducer/effect, so it survives
+    loading/error/success transitions and retries. `UseDocumentsResult`
+    gains `sortBy: SortKey` and `setSortBy: (sortBy: SortKey) => void`
+    alongside the existing `state`/`retry`.
+  - `src/features/documents/state/useDocuments.test.tsx` — add cases: it
+    defaults to `DEFAULT_SORT_KEY`; `setSortBy` updates it; it survives a
+    `retry()` that refetches (reject-then-resolve), proving the bug above
+    doesn't recur.
 
 - [ ] **4. `SortMenu` UI, wired into `DocumentsScreen`**
   - `src/shared/ui/theme.ts` — add `colors.primary` (accent, e.g.
@@ -87,9 +89,9 @@ Design decisions:
     RN `Modal` listing the three `SortKey` options; the selected one is
     highlighted with `colors.primary`.
   - `src/features/documents/ui/DocumentsScreen.tsx` — destructure
-    `setSortBy` from `useDocuments()`; on the `success` branch, derive
-    `sortDocuments(state.documents, state.sortBy)` and render `<SortMenu
-    selected={state.sortBy} onChange={setSortBy} />` in a toolbar row above
+    `sortBy`/`setSortBy` from `useDocuments()`; on the `success` branch,
+    derive `sortDocuments(state.documents, sortBy)` and render `<SortMenu
+    selected={sortBy} onChange={setSortBy} />` in a toolbar row above
     `DocumentList`.
   - `src/features/documents/ui/SortMenu.test.tsx` — renders the trigger,
     opening it shows all three options, tapping an option calls `onChange`
