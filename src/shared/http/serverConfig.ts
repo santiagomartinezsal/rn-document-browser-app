@@ -16,3 +16,7 @@ export function getServerHost(): string {
 export function getHttpBaseUrl(): string {
   return `http://${getServerHost()}:${CHALLENGE_SERVER_PORT}`;
 }
+
+export function getWsBaseUrl(): string {
+  return `ws://${getServerHost()}:${CHALLENGE_SERVER_PORT}`;
+}
