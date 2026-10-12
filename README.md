@@ -49,3 +49,16 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
   - axios / ky: would still need the same typed-error mapping on top, since neither throws our
     domain-specific error types; the only thing delegated is timeout/retry wiring, a small
     fraction of what the wrapper already does and tests.
+- Documents state: no state library (Zustand, Redux, Jotai...) here either — the state is one
+  fetch-on-mount lifecycle with no cross-feature sharing, undo, or persistence, so `useReducer`
+  already covers it with zero bundle cost and a plain, directly-testable reducer function, per
+  the State decision above. `DocumentsState` is a discriminated union (`idle | loading | success |
+  error`) over a single `status` field, not separate `isLoading`/`error`/`documents` flags — makes
+  impossible combinations (e.g. loading and error at once) unrepresentable. `DocumentsProvider`
+  takes the repository as a prop rather than constructing it internally, so `useDocuments` can be
+  tested against a fake repository without mocking any module.
+- Feature boundaries: `eslint-plugin-boundaries` enforces that a feature's internals are only
+  importable through its `index.ts` (`boundaries/dependencies` in `eslint.config.js`). Preferred
+  over hand-rolling it with `import/no-restricted-paths` (no new dependency, but needs an
+  `fs.readdirSync` scan and a generated zone per feature) for a declarative config that reads as
+  the rule itself rather than logic to trace through.
