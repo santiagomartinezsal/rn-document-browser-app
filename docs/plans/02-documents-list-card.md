@@ -44,7 +44,7 @@ small "users"/"link" icons the mockup shows next to the Contributors/Attachments
     and still shows both column labels when `contributors: []` and `attachments: []`.
   - Not wired into `DocumentsScreen` yet — compiles and is tested in isolation.
 
-- [ ] **2. `useDocuments` retry capability + tests**
+- [x] **2. `useDocuments` retry capability + tests**
   - `src/features/documents/state/useDocuments.ts` — return type becomes
     `UseDocumentsResult { state: DocumentsState; retry: () => void }`. Add a `fetchAttempt`
     counter via `useState`, included in the fetch effect's dependency array

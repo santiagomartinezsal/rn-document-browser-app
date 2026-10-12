@@ -1,12 +1,22 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import { useDocumentsRepository } from './DocumentsRepositoryContext';
 import { documentsReducer, initialDocumentsState } from './documentsReducer';
 import type { DocumentsState } from './documentsReducer';
 
-export function useDocuments(): DocumentsState {
+export interface UseDocumentsResult {
+  state: DocumentsState;
+  retry: () => void;
+}
+
+export function useDocuments(): UseDocumentsResult {
   const repository = useDocumentsRepository();
   const [state, dispatch] = useReducer(documentsReducer, initialDocumentsState);
+  const [fetchAttempt, setFetchAttempt] = useState(0);
+
+  const retry = () => {
+    setFetchAttempt((previousAttempt) => previousAttempt + 1);
+  };
 
   useEffect(() => {
     // Prevents a slow fetch from dispatching after the component unmounts or
@@ -30,9 +40,9 @@ export function useDocuments(): DocumentsState {
     return () => {
       isFetchStillCurrent = false;
     };
-  }, [repository]);
+  }, [repository, fetchAttempt]);
 
-  return state;
+  return { state, retry };
 }
 
 function toErrorMessage(error: unknown): string {

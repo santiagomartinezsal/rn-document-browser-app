@@ -12,7 +12,7 @@ function DocumentRow({ document }: { document: Document }) {
 }
 
 export function DocumentsScreen() {
-  const state = useDocuments();
+  const { state } = useDocuments();
 
   if (state.status === 'error') {
     return (

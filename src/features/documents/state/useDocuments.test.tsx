@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
 import type { Document } from '../domain/document';
@@ -35,7 +35,7 @@ describe('useDocuments', () => {
     const { result } = await renderWithRepository(repository);
 
     await waitFor(() => {
-      expect(result.current).toEqual({ status: 'success', documents: sampleDocuments });
+      expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
     });
   });
 
@@ -47,8 +47,31 @@ describe('useDocuments', () => {
     const { result } = await renderWithRepository(repository);
 
     await waitFor(() => {
-      expect(result.current).toEqual({ status: 'error', message: 'network down' });
+      expect(result.current.state).toEqual({ status: 'error', message: 'network down' });
     });
+  });
+
+  it('refetches from the repository when retry is called after a failure', async () => {
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(sampleDocuments);
+    const repository: DocumentsRepository = { getAll };
+
+    const { result } = await renderWithRepository(repository);
+
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'error', message: 'network down' });
+    });
+
+    await act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
+    });
+    expect(getAll).toHaveBeenCalledTimes(2);
   });
 
   it('throws when rendered outside a DocumentsProvider', async () => {
