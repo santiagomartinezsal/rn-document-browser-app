@@ -25,7 +25,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
 
 ## Commits
 
-- [ ] **1. `feat(shared): add reconnecting WebSocket with exponential backoff`**
+- [x] **1. `feat(shared): add reconnecting WebSocket with exponential backoff`**
   - `src/shared/ws/reconnectingWebSocket.ts` — `createReconnectingWebSocket({
     url, onMessage, createWebSocket?, initialDelayMs?, maxDelayMs? }):
     { start(); stop() }`. Modeled as an explicit state machine, a private
@@ -53,7 +53,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     after `stop()` is ignored; `stop()` then `start()` reconnects from
     scratch.
 
-- [ ] **2. `feat(notifications): add notification parser`**
+- [x] **2. `feat(notifications): add notification parser`**
   - `src/features/notifications/domain/notification.ts` — `Notification {
     userName: string; documentTitle: string; documentId: string; timestamp:
     string }`. Plain TS, no React/WS import, matching the `domain/` rule.
