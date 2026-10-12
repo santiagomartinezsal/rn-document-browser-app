@@ -62,3 +62,22 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
   over hand-rolling it with `import/no-restricted-paths` (no new dependency, but needs an
   `fs.readdirSync` scan and a generated zone per feature) for a declarative config that reads as
   the rule itself rather than logic to trace through.
+- Styling: plain React Native `StyleSheet.create` per component, referencing named constants from
+  `src/shared/ui/theme.ts` (`colors`, `spacing`, `fontSize`, `borderRadius`, `iconSize`) instead of
+  inline hex/pixel literals. Keeps colors and spacing consistent across components without a new
+  dependency or build-step config.
+
+  Alternatives considered:
+  - NativeWind (Tailwind for React Native): closer to a utility-class workflow, but needs a
+    babel/metro/global.css setup for a two-screen app whose only current styling need is one
+    card component — the plain constants file covers that with zero extra config.
+  - A component library (Tamagui, Restyle...): brings its own primitives and theming API on top
+    of RN's; more than this app's fixed, mockup-driven screens need.
+- Icons: `@expo/vector-icons` for the document card's Contributors/Attachments markers. It ships
+  bundled with the Expo SDK, so it works in Expo Go with no extra native-module linking. Its font
+  loader (`expo-font`) requires `expo-asset` at runtime, so that's installed alongside it even
+  though nothing here imports it directly.
+
+  Alternatives considered:
+  - `react-native-vector-icons` directly: the package `@expo/vector-icons` wraps, but without the
+    guaranteed auto-linking/Expo Go compatibility the Expo-maintained wrapper provides.

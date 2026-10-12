@@ -22,7 +22,7 @@ small "users"/"link" icons the mockup shows next to the Contributors/Attachments
 
 ## Commits
 
-- [ ] **1. `DocumentCard` component + tests**
+- [x] **1. `DocumentCard` component + tests**
   - `npx expo install @expo/vector-icons` (never plain `npm install`); add a README
     decision-record entry: why `@expo/vector-icons` (ships bundled with Expo, no extra
     native-module/Expo-Go risk) vs. the alternative considered — `react-native-vector-icons`
