@@ -1,43 +1,24 @@
-import type { WebSocketFactory, WebSocketLike } from '@/shared/ws/reconnectingWebSocket';
-
 import fixture from './notifications-messages.fixture.json';
 import { createNotificationsSocketSource } from './notificationsSocketSource';
 
-interface FakeSocket extends WebSocketLike {
-  readonly url: string;
-}
-
-function createFakeWebSocketFactory(): {
-  createWebSocket: WebSocketFactory;
-  sockets: FakeSocket[];
-} {
-  const sockets: FakeSocket[] = [];
-  const createWebSocket: WebSocketFactory = (url) => {
-    const socket: FakeSocket = {
-      url,
-      onopen: null,
-      onclose: null,
-      onerror: null,
-      onmessage: null,
-      close: jest.fn(),
-    };
-    sockets.push(socket);
-    return socket;
+function buildFakeSocket() {
+  return {
+    onmessage: null as ((event: { data: string }) => void) | null,
+    reconnect: jest.fn(),
+    close: jest.fn(),
   };
-  return { createWebSocket, sockets };
 }
 
 const URL = 'ws://localhost:8080/notifications';
 
 describe('createNotificationsSocketSource', () => {
   it('notifies the subscriber with the parsed notification on a valid message', () => {
-    const { createWebSocket, sockets } = createFakeWebSocketFactory();
-    const source = createNotificationsSocketSource(URL, createWebSocket);
+    const socket = buildFakeSocket();
+    const source = createNotificationsSocketSource(URL, () => socket);
     const onNotification = jest.fn();
     source.subscribe(onNotification);
 
-    source.start();
-    sockets[0].onmessage?.({ data: JSON.stringify(fixture[0]) });
+    socket.onmessage?.({ data: JSON.stringify(fixture[0]) });
 
     expect(onNotification).toHaveBeenCalledWith({
       userName: fixture[0].UserName,
@@ -49,37 +30,34 @@ describe('createNotificationsSocketSource', () => {
 
   it('drops a malformed message, warns, and keeps the stream running for later messages', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    const { createWebSocket, sockets } = createFakeWebSocketFactory();
-    const source = createNotificationsSocketSource(URL, createWebSocket);
+    const socket = buildFakeSocket();
+    const source = createNotificationsSocketSource(URL, () => socket);
     const onNotification = jest.fn();
     source.subscribe(onNotification);
 
-    source.start();
-    sockets[0].onmessage?.({ data: 'not json' });
-    sockets[0].onmessage?.({ data: JSON.stringify(fixture[0]) });
+    socket.onmessage?.({ data: 'not json' });
+    socket.onmessage?.({ data: JSON.stringify(fixture[0]) });
 
     expect(onNotification).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
 
-  it('delegates start to the underlying reconnecting socket', () => {
-    const { createWebSocket, sockets } = createFakeWebSocketFactory();
-    const source = createNotificationsSocketSource(URL, createWebSocket);
+  it('delegates start to the socket', () => {
+    const socket = buildFakeSocket();
+    const source = createNotificationsSocketSource(URL, () => socket);
 
     source.start();
 
-    expect(sockets).toHaveLength(1);
-    expect(sockets[0].url).toBe(URL);
+    expect(socket.reconnect).toHaveBeenCalled();
   });
 
-  it('delegates stop to the underlying reconnecting socket', () => {
-    const { createWebSocket, sockets } = createFakeWebSocketFactory();
-    const source = createNotificationsSocketSource(URL, createWebSocket);
+  it('delegates stop to the socket', () => {
+    const socket = buildFakeSocket();
+    const source = createNotificationsSocketSource(URL, () => socket);
 
-    source.start();
     source.stop();
 
-    expect(sockets[0].close).toHaveBeenCalled();
+    expect(socket.close).toHaveBeenCalled();
   });
 });

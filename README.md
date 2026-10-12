@@ -120,3 +120,30 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
     picker-button UX.
   - `react-native-document-picker`: not guaranteed Expo-Go-compatible, would likely force a
     development build.
+- Real-time transport: `partysocket`'s `WebSocket` class (reconnect with exponential backoff,
+  configurable via `maxRetries`/`minReconnectionDelay`/`maxReconnectionDelay`) instead of a
+  hand-written equivalent. It's a drop-in replacement for the platform `WebSocket` (same
+  `onopen`/`onmessage`/`onclose`/`onerror` surface, plus `reconnect()`/`close()`), pure JS with no
+  native module (`event-target-shim` is its only dependency, itself dependency-free), so Expo Go
+  needs no development build. 1.5M+ weekly downloads and released within the last few months,
+  versus the originally-considered `reconnecting-websocket`, whose last release was 6 years ago.
+  `notificationsSocketSource.ts` only unit-tests its own integration (parses a valid message,
+  drops and warns on a malformed one, delegates `start`/`stop` to `reconnect`/`close`) — the
+  backoff/retry timing itself is the library's responsibility and its own test suite's job, not
+  re-tested here.
+
+  Alternatives considered:
+  - Hand-written reconnecting WebSocket (a small `idle | connecting | open | waitingToRetry` state
+    machine over the platform `WebSocket`, backoff capped via `min(initialDelay * 2^n, maxDelay)`):
+    this is what shipped first, with its own fake-timer test suite covering the backoff schedule.
+    Working code, but maintaining a hand-rolled reconnect/backoff implementation (and its ~200
+    lines of tests) going forward has an ongoing cost a maintained library removes, for a part of
+    the app that isn't this project's differentiator.
+  - `socket.io-client`: incompatible outright — it speaks its own handshake protocol (namespaces,
+    acks, polling fallback) on top of WebSocket, and the challenge server is a plain `ws://`
+    endpoint emitting raw JSON frames, not a Socket.IO server.
+  - `@opensumi/reconnecting-websocket`: an actively maintained fork of the same abandoned package,
+    explicitly targeting React Native, but a small fraction of `partysocket`'s downloads/visibility.
+  - `react-use-websocket` / `react-native-use-websocket`: React hooks rather than a plain socket
+    wrapper — would compete with this project's own `useReducer`+Context state layer instead of
+    sitting underneath it in `api/`.

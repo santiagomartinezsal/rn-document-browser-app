@@ -5,9 +5,10 @@
 The documents vertical slice is in place (fetch, merge with local, list/grid,
 create-document modal). This milestone adds the second feature: real-time
 notifications over the challenge server's `ws://.../notifications` socket,
-surfaced as a bell with an unread badge and a panel listing them. CLAUDE.md
-calls for a hand-written reconnecting WebSocket (state machine, exponential
-backoff) rather than a library, and the usual `api/domain/state/ui` split.
+surfaced as a bell with an unread badge and a panel listing them. Uses
+`partysocket` for the reconnecting transport (see README decision record —
+originally hand-written, swapped out in commit 4 below) and the usual
+`api/domain/state/ui` split.
 
 Each commit below is one unit — stop after each so the user can confirm
 before moving on.
@@ -26,6 +27,8 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
 ## Commits
 
 - [x] **1. `feat(shared): add reconnecting WebSocket with exponential backoff`**
+  (superseded by commit 4 below — kept here as a historical record of what
+  originally shipped)
   - `src/shared/ws/reconnectingWebSocket.ts` — `createReconnectingWebSocket({
     url, onMessage, createWebSocket?, initialDelayMs?, maxDelayMs? }):
     { start(); stop() }`. Modeled as an explicit state machine, a private
@@ -77,7 +80,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     throws on a missing required field; throws when a field has the wrong
     type.
 
-- [ ] **3. `feat(notifications): add notifications reducer and context`**
+- [x] **3. `feat(notifications): add notifications reducer and context`**
   - `src/shared/http/serverConfig.ts` — add `getWsBaseUrl(): string`
     returning `` `ws://${getServerHost()}:${CHALLENGE_SERVER_PORT}` ``,
     next to the existing `getHttpBaseUrl()`. Extend
@@ -89,7 +92,9 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
   - `src/features/notifications/api/notificationsSocketSource.ts` —
     `createNotificationsSocketSource(url: string): NotificationsSource`,
     built on commit 1's `createReconnectingWebSocket` + commit 2's
-    `parseNotification`. On an unparseable message: catch
+    `parseNotification` (commit 1's primitive was later replaced by
+    `partysocket` in commit 4 — the public shape of this file is
+    unaffected). On an unparseable message: catch
     `InvalidNotificationError`, `console.warn` with the raw payload, and
     drop that message — the stream keeps running, mirroring
     `mapDocuments`' skip-and-warn precedent for the same situation.
@@ -99,6 +104,8 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     malformed message is dropped (callback not called) and
     `console.warn` is called, without breaking later valid messages;
     `start()`/`stop()` delegate to the underlying reconnecting socket.
+    (Commit 4 simplifies this test, since backoff timing is no longer
+    this project's own code to verify.)
   - `src/features/notifications/state/notificationsReducer.ts` —
     `NotificationsState { items: Notification[]; unreadCount: number }`,
     initial `{ items: [], unreadCount: 0 }`. `NotificationsAction`:
@@ -125,7 +132,34 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     the `Notification` type, and `createNotificationsSource(): NotificationsSource`
     (binds `getWsBaseUrl()` to `createNotificationsSocketSource`).
 
-- [ ] **4. `feat(notifications): add bell with unread badge`**
+- [x] **4. `refactor(notifications): replace hand-written WebSocket with partysocket`**
+  - Reviewing commit 1's `reconnectingWebSocket.ts`, decided a maintained
+    library is a better fit than carrying a hand-rolled reconnect/backoff
+    implementation (and its own ~200-line test suite) going forward — see
+    the full trade-off recorded in the README decision record.
+  - `npx expo install partysocket` (pure JS, no native module — no Expo Go
+    impact). Delete `src/shared/ws/` entirely (both files).
+  - `src/features/notifications/api/notificationsSocketSource.ts` —
+    rewritten on top of `partysocket`'s `WebSocket` class instead of the
+    deleted primitive: constructed with `{ startClosed: true }` so nothing
+    connects until `start()` calls `.reconnect()`; `stop()` calls
+    `.close()`. Takes an optional `createPartySocket` factory (defaulting
+    to the real `partysocket` constructor) purely for test injection — the
+    `NotificationsSource` interface and the rest of the feature are
+    unaffected.
+  - `src/features/notifications/api/notificationsSocketSource.test.ts` —
+    simplified: no more fake timers or backoff-schedule assertions (that's
+    `partysocket`'s own tested responsibility now), just this module's own
+    integration — parses a valid message, drops and warns on a malformed
+    one without breaking later messages, delegates `start`/`stop` to
+    `reconnect`/`close`.
+  - `README.md` — added the decision record entry for `partysocket` over
+    a hand-written implementation (plus `socket.io-client`, which turned
+    out to be protocol-incompatible with the challenge server's plain
+    `ws://` endpoint, and other alternatives). `CLAUDE.md`'s architecture
+    line updated to match.
+
+- [ ] **5. `feat(notifications): add bell with unread badge`**
   - `src/features/notifications/ui/NotificationBell.tsx` — presentational,
     `{ unreadCount, onPress }` props (no context coupling, so it's testable
     standalone): `Feather name="bell"` + a small badge `View`/`Text`
@@ -136,7 +170,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     hidden at `unreadCount={0}`; badge shows the count when `>0`; `onPress`
     fires on press.
 
-- [ ] **5. `feat(notifications): add notifications panel`**
+- [ ] **6. `feat(notifications): add notifications panel`**
   - `src/features/notifications/ui/NotificationsPanel.tsx` — RN `Modal`
     (same bottom-sheet shape as `AddDocumentModal.tsx`: `transparent`,
     `animationType="slide"`, `onRequestClose={onClose}`), listing `items`
@@ -159,7 +193,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     `App.test.tsx` only if the existing mock setup needs a fake source to
     avoid opening a real socket in tests.
 
-- [ ] **6. `feat(notifications): pause socket when the app goes to background`**
+- [ ] **7. `feat(notifications): pause socket when the app goes to background`**
   - In `useNotifications.ts`, add an `AppState.addEventListener('change',
     ...)` subscription (from `react-native` core — first use in this repo,
     no new dependency): on leaving `'active'`, call `source.stop()`; on
@@ -170,20 +204,11 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     backgrounding calls `source.stop()`; foregrounding again calls
     `source.start()`; unmounting removes the listener.
 
-- [ ] **7. `docs: record hand-written WebSocket decision`**
-  - `README.md` — add a "Decision record" entry for the hand-written
-    reconnecting WebSocket (state machine + exponential backoff) vs. a
-    library (`react-native-reconnecting-websocket`, `partysocket`,
-    `socket.io-client`), same shape as the existing `fetchJson` entry: why
-    (CLAUDE.md requires hand-written; the actual need — one socket URL, no
-    multiplexing/rooms/ack semantics — stays small and is fully exercised
-    by the fake-timer test) + an "Alternatives considered" sub-list.
-
 ## Verification
 
 - After each commit: `npm run lint`, `npm run typecheck`, `npm test`.
-- After commit 5, run the app (`npx expo start`) and confirm visually: the
+- After commit 6, run the app (`npx expo start`) and confirm visually: the
   bell badge increments as the challenge server's WS emits messages, the
   panel opens on tap and lists them, and the badge clears on open.
-- After commit 6, background and foreground the app (or simulate via the
+- After commit 7, background and foreground the app (or simulate via the
   AppState mock in tests) and confirm no duplicate sockets open on resume.

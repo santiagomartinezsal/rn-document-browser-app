@@ -63,4 +63,4 @@ https://docs.expo.dev/llms.txt.
   documents with locally created ones (the server has no POST).
 - State: `useReducer` + Context per feature, no state library.
 - Features don't import each other's internals; each exposes an `index.ts`.
-- Real-time: hand-written reconnecting WebSocket with exponential backoff.
+- Real-time: `partysocket` for the reconnecting WebSocket (see README decision record).
