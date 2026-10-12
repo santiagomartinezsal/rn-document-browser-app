@@ -1,4 +1,6 @@
 import { useEffect, useReducer } from 'react';
+import { AppState } from 'react-native';
+import type { AppStateStatus } from 'react-native';
 
 import { useNotificationsSource } from './NotificationsSourceContext';
 import { initialNotificationsState, notificationsReducer } from './notificationsReducer';
@@ -32,6 +34,22 @@ export function useNotifications(): UseNotificationsResult {
 
     return () => {
       source.stop();
+    };
+  }, [source]);
+
+  useEffect(() => {
+    function handleAppStateChange(nextAppState: AppStateStatus) {
+      if (nextAppState === 'active') {
+        source.start();
+      } else {
+        source.stop();
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove();
     };
   }, [source]);
 

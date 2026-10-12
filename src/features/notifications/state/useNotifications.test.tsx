@@ -1,5 +1,7 @@
 import { act, renderHook } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
+import { AppState } from 'react-native';
+import type { AppStateStatus } from 'react-native';
 
 import type { Notification } from '../domain/notification';
 import type { NotificationsSource } from '../domain/notificationsSource';
@@ -22,6 +24,23 @@ function buildSource(overrides: Partial<NotificationsSource> = {}): Notification
   };
 }
 
+function mockAppStateListener(): {
+  emitChange: (status: AppStateStatus) => void;
+  remove: jest.Mock;
+} {
+  let handleChange: ((status: AppStateStatus) => void) | undefined;
+  const remove = jest.fn();
+  jest.spyOn(AppState, 'addEventListener').mockImplementation((_event, listener) => {
+    handleChange = listener;
+    return { remove };
+  });
+
+  return {
+    emitChange: (status) => handleChange?.(status),
+    remove,
+  };
+}
+
 function renderWithSource(source: NotificationsSource) {
   function wrapper({ children }: { children: ReactNode }) {
     return <NotificationsProvider source={source}>{children}</NotificationsProvider>;
@@ -31,6 +50,14 @@ function renderWithSource(source: NotificationsSource) {
 }
 
 describe('useNotifications', () => {
+  beforeEach(() => {
+    jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('starts the source on mount', async () => {
     const source = buildSource();
 
@@ -118,6 +145,45 @@ describe('useNotifications', () => {
     await unmount();
 
     expect(source.stop).toHaveBeenCalled();
+  });
+
+  it('stops the source when the app leaves the active state', async () => {
+    const source = buildSource();
+    const { emitChange } = mockAppStateListener();
+    await renderWithSource(source);
+    jest.mocked(source.stop).mockClear();
+
+    await act(() => {
+      emitChange('background');
+    });
+
+    expect(source.stop).toHaveBeenCalled();
+  });
+
+  it('starts the source again when the app returns to active', async () => {
+    const source = buildSource();
+    const { emitChange } = mockAppStateListener();
+    await renderWithSource(source);
+    jest.mocked(source.start).mockClear();
+
+    await act(() => {
+      emitChange('background');
+    });
+    await act(() => {
+      emitChange('active');
+    });
+
+    expect(source.start).toHaveBeenCalled();
+  });
+
+  it('removes the AppState listener on unmount', async () => {
+    const source = buildSource();
+    const { remove } = mockAppStateListener();
+    const { unmount } = await renderWithSource(source);
+
+    await unmount();
+
+    expect(remove).toHaveBeenCalled();
   });
 
   it('throws when rendered outside a NotificationsProvider', async () => {

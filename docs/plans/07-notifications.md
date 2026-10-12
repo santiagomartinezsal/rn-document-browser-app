@@ -193,7 +193,7 @@ style (`Feather` from `@expo/vector-icons`, already a dependency).
     `App.test.tsx` only if the existing mock setup needs a fake source to
     avoid opening a real socket in tests.
 
-- [ ] **7. `feat(notifications): pause socket when the app goes to background`**
+- [x] **7. `feat(notifications): pause socket when the app goes to background`**
   - In `useNotifications.ts`, add an `AppState.addEventListener('change',
     ...)` subscription (from `react-native` core — first use in this repo,
     no new dependency): on leaving `'active'`, call `source.stop()`; on
