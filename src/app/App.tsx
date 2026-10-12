@@ -1,4 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import {
   createDocumentsRepository,
@@ -10,9 +11,11 @@ const repository = createDocumentsRepository();
 
 export default function App() {
   return (
-    <DocumentsProvider repository={repository}>
-      <DocumentsScreen />
-      <StatusBar style="auto" />
-    </DocumentsProvider>
+    <SafeAreaProvider>
+      <DocumentsProvider repository={repository}>
+        <DocumentsScreen />
+        <StatusBar style="auto" />
+      </DocumentsProvider>
+    </SafeAreaProvider>
   );
 }

@@ -86,3 +86,13 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
   Alternatives considered:
   - `react-native-vector-icons` directly: the package `@expo/vector-icons` wraps, but without the
     guaranteed auto-linking/Expo Go compatibility the Expo-maintained wrapper provides.
+- Safe area: `react-native-safe-area-context`'s `SafeAreaProvider` (root, in `App.tsx`) and
+  `SafeAreaView` (wrapping `DocumentsScreen`'s content) keep the screen clear of the status
+  bar/notch/home indicator. Bundled in Expo Go for SDK 57, no dev build needed. Tests use the
+  library's own `jest/mock` (wired via `package.json`'s `jest.setupFiles`) so components don't
+  need a real `SafeAreaProvider` ancestor to resolve insets in Jest.
+
+  Alternatives considered:
+  - React Native core's own `SafeAreaView`: iOS-only (a no-op on Android), and effectively
+    deprecated in favor of this library — wouldn't actually handle the Android case this app
+    targets.
