@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   createDocumentsRepository,
@@ -8,18 +9,29 @@ import {
 } from '@/features/documents';
 import { createNotificationsSource, NotificationsProvider } from '@/features/notifications';
 
+import { AppHeader } from './AppHeader';
+
 const repository = createDocumentsRepository();
 const notificationsSource = createNotificationsSource();
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <DocumentsProvider repository={repository}>
+      <SafeAreaView style={styles.safeArea}>
         <NotificationsProvider source={notificationsSource}>
-          <DocumentsScreen />
-          <StatusBar style="auto" />
+          <AppHeader title="Documents" />
         </NotificationsProvider>
-      </DocumentsProvider>
+        <DocumentsProvider repository={repository}>
+          <DocumentsScreen />
+        </DocumentsProvider>
+      </SafeAreaView>
+      <StatusBar style="auto" />
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+});

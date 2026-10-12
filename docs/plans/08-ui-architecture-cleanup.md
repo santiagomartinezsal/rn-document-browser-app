@@ -33,7 +33,7 @@ Verified repo state: working tree clean on `main`
 
 ## Commits
 
-- [ ] **1. `refactor(app): move the header out of the documents feature`**
+- [x] **1. `refactor(app): move the header out of the documents feature`**
   - `src/app/AppHeader.tsx` (new) — `AppHeader({ title }: { title: string })`,
     moved verbatim from the current `Header` function in
     `src/features/documents/ui/DocumentsScreen.tsx`: calls `useNotifications()`,

@@ -29,6 +29,7 @@ describe('App', () => {
 
     await render(<App />);
 
+    expect(await screen.findByText('Documents')).toBeOnTheScreen();
     expect(await screen.findByText(serverResponse[0].Title)).toBeOnTheScreen();
   });
 });

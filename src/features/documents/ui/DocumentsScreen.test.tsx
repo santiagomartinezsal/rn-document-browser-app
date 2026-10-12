@@ -1,8 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import * as DocumentPicker from 'expo-document-picker';
-
-import type { Notification, NotificationsSource } from '@/features/notifications';
-import { NotificationsProvider } from '@/features/notifications';
 
 import { createInMemoryLocalDocumentsSource } from '../api/inMemoryLocalDocumentsSource';
 import { createMergingDocumentsRepository } from '../api/mergingDocumentsRepository';
@@ -14,24 +11,6 @@ import { DocumentsScreen } from './DocumentsScreen';
 jest.mock('expo-document-picker', () => ({
   getDocumentAsync: jest.fn(),
 }));
-
-const sampleNotification: Notification = {
-  userName: 'Hazle Kuhlman',
-  documentTitle: 'Two Hearted Ale',
-  documentId: 'notif-doc-1',
-  timestamp: '2026-10-09T16:15:42.570Z',
-};
-
-function buildNotificationsSource(
-  overrides: Partial<NotificationsSource> = {},
-): NotificationsSource {
-  return {
-    subscribe: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-    ...overrides,
-  };
-}
 
 const sampleDocuments: Document[] = [
   {
@@ -54,16 +33,11 @@ const sampleDocuments: Document[] = [
   },
 ];
 
-function renderScreen(
-  server: DocumentsRepository,
-  notificationsSource: NotificationsSource = buildNotificationsSource(),
-) {
+function renderScreen(server: DocumentsRepository) {
   const repository = createMergingDocumentsRepository(server, createInMemoryLocalDocumentsSource());
   return render(
     <DocumentsProvider repository={repository}>
-      <NotificationsProvider source={notificationsSource}>
-        <DocumentsScreen />
-      </NotificationsProvider>
+      <DocumentsScreen />
     </DocumentsProvider>,
   );
 }
@@ -170,17 +144,6 @@ describe('DocumentsScreen', () => {
     expect(await screen.findByText('First Document')).toBeOnTheScreen();
   });
 
-  it('shows the "Documents" header while still loading', async () => {
-    const repository: DocumentsRepository = {
-      getAll: jest.fn().mockReturnValue(new Promise<Document[]>(() => {})),
-    };
-
-    await renderScreen(repository);
-
-    expect(screen.getByText('Documents')).toBeOnTheScreen();
-    expect(screen.getByTestId('documents-loading')).toBeOnTheScreen();
-  });
-
   it('shows an error message and a retry button when the repository rejects', async () => {
     const repository: DocumentsRepository = {
       getAll: jest.fn().mockRejectedValue(new Error('network down')),
@@ -254,42 +217,5 @@ describe('DocumentsScreen', () => {
     const renderedIds = getRenderedDocumentIds();
     expect(renderedIds[0]).not.toEqual('document-doc-1');
     expect(renderedIds[0]).not.toEqual('document-doc-2');
-  });
-
-  it('opens the notifications panel when the bell is pressed', async () => {
-    const repository: DocumentsRepository = {
-      getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
-
-    await renderScreen(repository);
-    await screen.findByText('First Document');
-
-    await fireEvent.press(screen.getByTestId('notification-bell'));
-
-    expect(screen.getByTestId('notifications-panel-close-button')).toBeOnTheScreen();
-  });
-
-  it('clears the unread badge when the panel is opened', async () => {
-    let emit: ((notification: Notification) => void) | undefined;
-    const notificationsSource = buildNotificationsSource({
-      subscribe: jest.fn((onNotification) => {
-        emit = onNotification;
-      }),
-    });
-    const repository: DocumentsRepository = {
-      getAll: jest.fn().mockResolvedValue(sampleDocuments),
-    };
-
-    await renderScreen(repository, notificationsSource);
-    await screen.findByText('First Document');
-    await act(() => {
-      emit?.(sampleNotification);
-    });
-
-    expect(screen.getByTestId('notification-bell-badge')).toBeOnTheScreen();
-
-    await fireEvent.press(screen.getByTestId('notification-bell'));
-
-    expect(screen.queryByTestId('notification-bell-badge')).not.toBeOnTheScreen();
   });
 });

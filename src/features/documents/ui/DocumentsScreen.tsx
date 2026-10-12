@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
-import { NotificationBell, NotificationsPanel, useNotifications } from '@/features/notifications';
-import { colors, fontSize, spacing } from '@/shared/ui/theme';
+import { colors, spacing } from '@/shared/ui/theme';
 
 import { sortDocuments } from '../domain/sortDocuments';
 import { useDocuments } from '../state/useDocuments';
@@ -17,19 +15,7 @@ import { LoadingState } from './LoadingState';
 import { SortMenu } from './SortMenu';
 import { ViewModeToggle } from './ViewModeToggle';
 
-function Header() {
-  const { items, unreadCount, isPanelOpen, openPanel, closePanel } = useNotifications();
-
-  return (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Documents</Text>
-      <NotificationBell unreadCount={unreadCount} onPress={openPanel} />
-      <NotificationsPanel visible={isPanelOpen} notifications={items} onClose={closePanel} />
-    </View>
-  );
-}
-
-function DocumentsBody() {
+export function DocumentsScreen() {
   const { state, retry, sortBy, setSortBy, viewMode, setViewMode, addDocument } = useDocuments();
   const [isAddDocumentModalOpen, setIsAddDocumentModalOpen] = useState(false);
 
@@ -72,31 +58,7 @@ function DocumentsBody() {
   );
 }
 
-export function DocumentsScreen() {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <Header />
-      <DocumentsBody />
-    </SafeAreaView>
-  );
-}
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-  },
-  headerTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
   body: {
     flex: 1,
   },
