@@ -12,3 +12,9 @@ export interface Document {
   contributors: DocumentContributor[];
   version: string;
 }
+
+export interface CreateDocumentInput {
+  title: string;
+  version: string;
+  fileName: string;
+}

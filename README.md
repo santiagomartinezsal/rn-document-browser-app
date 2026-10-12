@@ -107,3 +107,16 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
   every `retry()`/refetch, silently discarding the user's choice. `SortMenu`'s dropdown is a plain
   RN `Modal` + `Pressable` list (no new dependency); the mockup doesn't show the open state, so its
   look is a judgement call using the existing theme tokens.
+- File picker: `expo-document-picker` for the "Add document" modal's File field. It ships bundled
+  in Expo Go, so no development build or config plugin is needed for the basic `getDocumentAsync()`
+  call used here. The picker result's `uri`/`mimeType` are never read past that call — this app
+  only ever stores the picked file's `name` as an attachment reference, since there's no `POST
+  /documents` to upload bytes to and no local persistence layer to copy them into;
+  `copyToCacheDirectory: false` is passed for the same reason, so nothing is written to the app's
+  cache.
+
+  Alternatives considered:
+  - A plain text input for a file name: no new dependency, but diverges from the mockup's
+    picker-button UX.
+  - `react-native-document-picker`: not guaranteed Expo-Go-compatible, would likely force a
+    development build.

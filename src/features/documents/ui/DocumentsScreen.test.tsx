@@ -1,9 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import * as DocumentPicker from 'expo-document-picker';
 
 import type { Document } from '../domain/document';
 import type { DocumentsRepository } from '../domain/documentsRepository';
 import { DocumentsProvider } from '../state/DocumentsRepositoryContext';
 import { DocumentsScreen } from './DocumentsScreen';
+
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn(),
+}));
 
 const sampleDocuments: Document[] = [
   {
@@ -184,5 +189,41 @@ describe('DocumentsScreen', () => {
 
     expect(await screen.findByTestId('documents-empty')).toBeOnTheScreen();
     expect(screen.getByText('No documents yet.')).toBeOnTheScreen();
+  });
+
+  it('shows the Add document button even when the list is empty', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue([]),
+    };
+
+    await renderScreen(repository);
+
+    expect(await screen.findByTestId('documents-empty')).toBeOnTheScreen();
+    expect(screen.getByTestId('add-document-button')).toBeOnTheScreen();
+  });
+
+  it('adds the created document to the top of the list after a successful submit', async () => {
+    jest.mocked(DocumentPicker.getDocumentAsync).mockResolvedValue({
+      canceled: false,
+      assets: [{ name: 'manual.pdf', uri: 'file:///manual.pdf', lastModified: 0 }],
+    });
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    await renderScreen(repository);
+    await screen.findByText('First Document');
+
+    await fireEvent.press(screen.getByTestId('add-document-button'));
+    await fireEvent.changeText(screen.getByTestId('add-document-title-input'), 'Third Document');
+    await fireEvent.changeText(screen.getByTestId('add-document-version-input'), '1.0.0');
+    await fireEvent.press(screen.getByTestId('add-document-choose-file-button'));
+    await screen.findByText('manual.pdf');
+    await fireEvent.press(screen.getByTestId('add-document-submit-button'));
+
+    expect(await screen.findByText('Third Document')).toBeOnTheScreen();
+    const renderedIds = getRenderedDocumentIds();
+    expect(renderedIds[0]).not.toEqual('document-doc-1');
+    expect(renderedIds[0]).not.toEqual('document-doc-2');
   });
 });

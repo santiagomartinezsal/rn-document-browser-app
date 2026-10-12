@@ -41,4 +41,30 @@ describe('documentsReducer', () => {
 
     expect(state).toEqual({ status: 'error', message: 'Request timed out' });
   });
+
+  it('prepends the created document to the list on DOCUMENT_CREATED when status is success', () => {
+    const successState = documentsReducer(initialDocumentsState, {
+      type: 'FETCH_SUCCEEDED',
+      documents: sampleDocuments,
+    });
+    const newDocument: Document = { ...sampleDocuments[0], id: 'doc-2', title: 'New Document' };
+
+    const state = documentsReducer(successState, {
+      type: 'DOCUMENT_CREATED',
+      document: newDocument,
+    });
+
+    expect(state).toEqual({ status: 'success', documents: [newDocument, ...sampleDocuments] });
+  });
+
+  it('ignores DOCUMENT_CREATED when status is not success', () => {
+    const newDocument: Document = { ...sampleDocuments[0], id: 'doc-2', title: 'New Document' };
+
+    const state = documentsReducer(initialDocumentsState, {
+      type: 'DOCUMENT_CREATED',
+      document: newDocument,
+    });
+
+    expect(state).toEqual(initialDocumentsState);
+  });
 });

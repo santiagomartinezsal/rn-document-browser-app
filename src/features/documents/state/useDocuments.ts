@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useState } from 'react';
 
+import type { CreateDocumentInput, Document } from '../domain/document';
 import { DEFAULT_SORT_KEY } from '../domain/sortDocuments';
 import type { SortKey } from '../domain/sortDocuments';
 import { useDocumentsRepository } from './DocumentsRepositoryContext';
@@ -17,6 +18,7 @@ export interface UseDocumentsResult {
   setSortBy: (sortBy: SortKey) => void;
   viewMode: ViewMode;
   setViewMode: (viewMode: ViewMode) => void;
+  addDocument: (input: CreateDocumentInput) => void;
 }
 
 export function useDocuments(): UseDocumentsResult {
@@ -28,6 +30,10 @@ export function useDocuments(): UseDocumentsResult {
 
   const retry = () => {
     setFetchAttempt((previousAttempt) => previousAttempt + 1);
+  };
+
+  const addDocument = (input: CreateDocumentInput) => {
+    dispatch({ type: 'DOCUMENT_CREATED', document: buildLocalDocument(input) });
   };
 
   useEffect(() => {
@@ -54,9 +60,26 @@ export function useDocuments(): UseDocumentsResult {
     };
   }, [repository, fetchAttempt]);
 
-  return { state, retry, sortBy, setSortBy, viewMode, setViewMode };
+  return { state, retry, sortBy, setSortBy, viewMode, setViewMode, addDocument };
 }
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Failed to load documents';
+}
+
+// Deliberately temporary: builds the Document inline instead of going through a
+// repository. docs/plans/06-create-document.md's commit 2 extracts this into a
+// LocalDocumentsSource.
+function buildLocalDocument(input: CreateDocumentInput): Document {
+  const now = new Date().toISOString();
+
+  return {
+    id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title: input.title.trim(),
+    version: input.version.trim(),
+    createdAt: now,
+    updatedAt: now,
+    attachments: [input.fileName],
+    contributors: [],
+  };
 }

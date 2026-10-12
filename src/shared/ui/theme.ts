@@ -5,6 +5,7 @@ export const colors = {
   background: '#F3F4F6',
   accent: '#2563EB',
   border: '#E5E7EB',
+  error: '#DC2626',
 } as const;
 
 export const spacing = {

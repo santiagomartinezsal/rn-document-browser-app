@@ -182,4 +182,36 @@ describe('useDocuments', () => {
     });
     expect(result.current.viewMode).toBe('grid');
   });
+
+  it('prepends a locally built document when addDocument is called', async () => {
+    const repository: DocumentsRepository = {
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    };
+
+    const { result } = await renderWithRepository(repository);
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('success');
+    });
+
+    await act(() => {
+      result.current.addDocument({
+        title: ' New Doc ',
+        version: ' 1.0.0 ',
+        fileName: 'manual.pdf',
+      });
+    });
+
+    const { state } = result.current;
+    if (state.status !== 'success') {
+      throw new Error('Expected state to still be success');
+    }
+    expect(state.documents).toHaveLength(sampleDocuments.length + 1);
+    expect(state.documents[0]).toMatchObject({
+      title: 'New Doc',
+      version: '1.0.0',
+      attachments: ['manual.pdf'],
+      contributors: [],
+    });
+    expect(state.documents[0].id).toMatch(/^local-/);
+  });
 });

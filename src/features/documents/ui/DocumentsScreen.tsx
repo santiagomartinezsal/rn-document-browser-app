@@ -1,11 +1,14 @@
+import { Feather } from '@expo/vector-icons';
+import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { borderRadius, colors, fontSize, spacing } from '@/shared/ui/theme';
+import { borderRadius, colors, fontSize, iconSize, spacing } from '@/shared/ui/theme';
 
 import type { Document } from '../domain/document';
 import { sortDocuments } from '../domain/sortDocuments';
 import { useDocuments } from '../state/useDocuments';
+import { AddDocumentModal } from './AddDocumentModal';
 import { DocumentCard } from './DocumentCard';
 import { DocumentGrid } from './DocumentGrid';
 import { SortMenu } from './SortMenu';
@@ -64,8 +67,23 @@ function DocumentList({ documents }: { documents: Document[] }) {
   );
 }
 
+function AddDocumentButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      testID="add-document-button"
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.addDocumentButton}
+    >
+      <Feather name="plus" size={iconSize.sm} color={colors.surface} />
+      <Text style={styles.addDocumentButtonText}>Add document</Text>
+    </Pressable>
+  );
+}
+
 function DocumentsBody() {
-  const { state, retry, sortBy, setSortBy, viewMode, setViewMode } = useDocuments();
+  const { state, retry, sortBy, setSortBy, viewMode, setViewMode, addDocument } = useDocuments();
+  const [isAddDocumentModalOpen, setIsAddDocumentModalOpen] = useState(false);
 
   if (state.status === 'error') {
     return <ErrorState message={state.message} onRetry={retry} />;
@@ -75,23 +93,33 @@ function DocumentsBody() {
     return <LoadingState />;
   }
 
-  if (state.documents.length === 0) {
-    return <EmptyState />;
-  }
-
   const documents = sortDocuments(state.documents, sortBy);
 
   return (
     <View style={styles.body}>
-      <View style={styles.toolbar}>
-        <SortMenu selected={sortBy} onChange={setSortBy} />
-        <ViewModeToggle selected={viewMode} onChange={setViewMode} />
-      </View>
-      {viewMode === 'grid' ? (
-        <DocumentGrid documents={documents} />
+      {documents.length === 0 ? (
+        <EmptyState />
       ) : (
-        <DocumentList documents={documents} />
+        <>
+          <View style={styles.toolbar}>
+            <SortMenu selected={sortBy} onChange={setSortBy} />
+            <ViewModeToggle selected={viewMode} onChange={setViewMode} />
+          </View>
+          <View style={styles.listArea}>
+            {viewMode === 'grid' ? (
+              <DocumentGrid documents={documents} />
+            ) : (
+              <DocumentList documents={documents} />
+            )}
+          </View>
+        </>
       )}
+      <AddDocumentButton onPress={() => setIsAddDocumentModalOpen(true)} />
+      <AddDocumentModal
+        visible={isAddDocumentModalOpen}
+        onClose={() => setIsAddDocumentModalOpen(false)}
+        onSubmit={addDocument}
+      />
     </View>
   );
 }
@@ -148,5 +176,23 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.lg,
+  },
+  listArea: {
+    flex: 1,
+  },
+  addDocumentButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    margin: spacing.lg,
+  },
+  addDocumentButtonText: {
+    color: colors.surface,
+    fontSize: fontSize.md,
+    fontWeight: '700',
   },
 });
