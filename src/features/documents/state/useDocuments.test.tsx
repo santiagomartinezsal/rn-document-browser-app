@@ -3,8 +3,10 @@ import type { ReactNode } from 'react';
 
 import type { Document } from '../domain/document';
 import type { DocumentsRepository } from '../domain/documentsRepository';
+import type { LocalDocumentsSource } from '../domain/localDocumentsSource';
 import { DEFAULT_SORT_KEY } from '../domain/sortDocuments';
 import { DocumentsProvider } from './DocumentsRepositoryContext';
+import { LocalDocumentsSourceProvider } from './LocalDocumentsSourceContext';
 import { useDocuments } from './useDocuments';
 
 const sampleDocuments: Document[] = [
@@ -19,9 +21,26 @@ const sampleDocuments: Document[] = [
   },
 ];
 
-function renderWithRepository(repository: DocumentsRepository) {
+function buildLocalSource(overrides: Partial<LocalDocumentsSource> = {}): LocalDocumentsSource {
+  return {
+    add: jest.fn(),
+    getAll: jest.fn().mockReturnValue([]),
+    ...overrides,
+  };
+}
+
+function renderWithRepository(
+  repository: DocumentsRepository,
+  localSource: LocalDocumentsSource = buildLocalSource(),
+) {
   function wrapper({ children }: { children: ReactNode }) {
-    return <DocumentsProvider repository={repository}>{children}</DocumentsProvider>;
+    return (
+      <DocumentsProvider repository={repository}>
+        <LocalDocumentsSourceProvider localSource={localSource}>
+          {children}
+        </LocalDocumentsSourceProvider>
+      </DocumentsProvider>
+    );
   }
 
   return renderHook(() => useDocuments(), { wrapper });
@@ -183,35 +202,35 @@ describe('useDocuments', () => {
     expect(result.current.viewMode).toBe('grid');
   });
 
-  it('prepends a locally built document when addDocument is called', async () => {
+  it('prepends the document returned by the local source when addDocument is called', async () => {
     const repository: DocumentsRepository = {
       getAll: jest.fn().mockResolvedValue(sampleDocuments),
     };
+    const createdDocument: Document = {
+      id: 'local-123',
+      title: 'New Doc',
+      version: '1.0.0',
+      createdAt: '2024-02-01T00:00:00Z',
+      updatedAt: '2024-02-01T00:00:00Z',
+      attachments: ['manual.pdf'],
+      contributors: [],
+    };
+    const localSource = buildLocalSource({ add: jest.fn().mockReturnValue(createdDocument) });
 
-    const { result } = await renderWithRepository(repository);
+    const { result } = await renderWithRepository(repository, localSource);
     await waitFor(() => {
       expect(result.current.state.status).toBe('success');
     });
 
+    const input = { title: 'New Doc', version: '1.0.0', fileName: 'manual.pdf' };
     await act(() => {
-      result.current.addDocument({
-        title: ' New Doc ',
-        version: ' 1.0.0 ',
-        fileName: 'manual.pdf',
-      });
+      result.current.addDocument(input);
     });
 
-    const { state } = result.current;
-    if (state.status !== 'success') {
-      throw new Error('Expected state to still be success');
-    }
-    expect(state.documents).toHaveLength(sampleDocuments.length + 1);
-    expect(state.documents[0]).toMatchObject({
-      title: 'New Doc',
-      version: '1.0.0',
-      attachments: ['manual.pdf'],
-      contributors: [],
+    expect(localSource.add).toHaveBeenCalledWith(input);
+    expect(result.current.state).toEqual({
+      status: 'success',
+      documents: [createdDocument, ...sampleDocuments],
     });
-    expect(state.documents[0].id).toMatch(/^local-/);
   });
 });

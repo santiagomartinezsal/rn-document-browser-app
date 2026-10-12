@@ -27,7 +27,7 @@ trigger button is visible at the bottom of `mockups/mdc_1.png` (list view).
 
 ## Commits
 
-- [ ] **1. "Add document" modal, wired directly into state**
+- [x] **1. "Add document" modal, wired directly into state**
 
   Gets the feature visibly working end-to-end: submitting the modal appends
   a document to the current list. No local-source abstraction yet — the
