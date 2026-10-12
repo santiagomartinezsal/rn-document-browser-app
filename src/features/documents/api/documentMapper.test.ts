@@ -4,7 +4,7 @@ import {
   InvalidDocumentsResponseError,
   mapDocument,
   mapDocuments,
-} from './document-mapper';
+} from './documentMapper';
 
 describe('mapDocuments', () => {
   it('maps every document in the server fixture', () => {

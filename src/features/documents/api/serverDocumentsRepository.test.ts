@@ -1,9 +1,9 @@
-import { fetchJson } from '@/shared/http/http-client';
+import { fetchJson } from '@/shared/http/httpClient';
 
 import fixture from './documents-response.fixture.json';
-import { createServerDocumentsRepository } from './server-documents-repository';
+import { createServerDocumentsRepository } from './serverDocumentsRepository';
 
-jest.mock('@/shared/http/http-client');
+jest.mock('@/shared/http/httpClient');
 
 const mockedFetchJson = fetchJson as jest.MockedFunction<typeof fetchJson>;
 

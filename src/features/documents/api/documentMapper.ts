@@ -1,5 +1,5 @@
 import type { Document, DocumentContributor } from '../domain/document';
-import type { DocumentContributorDto, DocumentDto } from './document-dto';
+import type { DocumentContributorDto, DocumentDto } from './documentDto';
 
 export class InvalidDocumentError extends Error {}
 export class InvalidDocumentsResponseError extends Error {}

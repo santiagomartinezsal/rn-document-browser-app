@@ -1,10 +1,10 @@
-import { DEFAULT_TIMEOUT_MS, fetchJson } from './http-client';
+import { DEFAULT_TIMEOUT_MS, fetchJson } from './httpClient';
 import {
   HttpNetworkError,
   HttpParseError,
   HttpResponseError,
   HttpTimeoutError,
-} from './http-errors';
+} from './httpErrors';
 
 const url = 'http://localhost:8080/documents';
 

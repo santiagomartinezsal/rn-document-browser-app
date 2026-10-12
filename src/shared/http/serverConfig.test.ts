@@ -1,4 +1,4 @@
-import { CHALLENGE_SERVER_PORT, resolveServerHost } from './server-config';
+import { CHALLENGE_SERVER_PORT, resolveServerHost } from './serverConfig';
 import type { PlatformOSType } from 'react-native';
 
 describe('resolveServerHost', () => {

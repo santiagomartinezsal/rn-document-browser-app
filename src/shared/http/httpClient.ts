@@ -3,7 +3,7 @@ import {
   HttpParseError,
   HttpResponseError,
   HttpTimeoutError,
-} from './http-errors';
+} from './httpErrors';
 
 export const DEFAULT_TIMEOUT_MS = 10_000;
 

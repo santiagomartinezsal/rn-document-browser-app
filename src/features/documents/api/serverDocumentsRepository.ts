@@ -1,7 +1,7 @@
-import { fetchJson } from '@/shared/http/http-client';
+import { fetchJson } from '@/shared/http/httpClient';
 
-import type { DocumentsRepository } from '../domain/documents-repository';
-import { mapDocuments } from './document-mapper';
+import type { DocumentsRepository } from '../domain/documentsRepository';
+import { mapDocuments } from './documentMapper';
 
 export function createServerDocumentsRepository(baseUrl: string): DocumentsRepository {
   return {
