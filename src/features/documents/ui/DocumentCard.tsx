@@ -13,7 +13,9 @@ export function DocumentCard({ document }: DocumentCardProps) {
   return (
     <View testID={`document-${document.id}`} style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title} numberOfLines={1}>{document.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {document.title}
+        </Text>
         <Text style={styles.version}>Version {document.version}</Text>
       </View>
       <View style={styles.columns}>
