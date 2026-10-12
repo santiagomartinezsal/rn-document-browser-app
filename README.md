@@ -62,6 +62,11 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`.
   over hand-rolling it with `import/no-restricted-paths` (no new dependency, but needs an
   `fs.readdirSync` scan and a generated zone per feature) for a declarative config that reads as
   the rule itself rather than logic to trace through.
+- React Compiler: enabled (`experiments.reactCompiler` in `app.json`) so components and hook
+  return values are memoized automatically — no hand-written `useMemo`/`useCallback`/`React.memo`.
+  Stable and maintained by the React team; Expo SDK 54+ wires the Babel plugin in automatically
+  (no extra dependency), and SDK 55+ bundles its ESLint rules in `eslint-config-expo`, so lint
+  already catches Rules-of-React violations the compiler couldn't safely optimize around.
 - Styling: plain React Native `StyleSheet.create` per component, referencing named constants from
   `src/shared/ui/theme.ts` (`colors`, `spacing`, `fontSize`, `borderRadius`, `iconSize`) instead of
   inline hex/pixel literals. Keeps colors and spacing consistent across components without a new

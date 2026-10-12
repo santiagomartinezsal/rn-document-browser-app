@@ -24,6 +24,9 @@
     },
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "experiments": {
+      "reactCompiler": true
+    }
   }
 }
