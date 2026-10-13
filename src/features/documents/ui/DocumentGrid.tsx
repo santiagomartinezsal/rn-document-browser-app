@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 
 import { colors, spacing } from '@/shared/ui/theme';
 
@@ -7,9 +7,11 @@ import { DocumentGridCard } from './DocumentGridCard';
 
 export interface DocumentGridProps {
   documents: Document[];
+  refreshing: boolean;
+  onRefresh: () => void;
 }
 
-export function DocumentGrid({ documents }: DocumentGridProps) {
+export function DocumentGrid({ documents, refreshing, onRefresh }: DocumentGridProps) {
   return (
     <FlatList
       testID="documents-grid-list"
@@ -20,6 +22,14 @@ export function DocumentGrid({ documents }: DocumentGridProps) {
       data={documents}
       keyExtractor={(document) => document.id}
       renderItem={({ item }) => <DocumentGridCard document={item} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.accent}
+          colors={[colors.accent]}
+        />
+      }
     />
   );
 }

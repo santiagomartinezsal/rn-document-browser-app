@@ -26,7 +26,9 @@ const sampleDocuments: Document[] = [
 
 describe('DocumentGrid', () => {
   it('renders a grid card for each document', async () => {
-    await render(<DocumentGrid documents={sampleDocuments} />);
+    await render(
+      <DocumentGrid documents={sampleDocuments} refreshing={false} onRefresh={() => {}} />,
+    );
 
     expect(screen.getByTestId('document-grid-doc-1')).toBeOnTheScreen();
     expect(screen.getByTestId('document-grid-doc-2')).toBeOnTheScreen();
@@ -37,10 +39,23 @@ describe('DocumentGrid', () => {
   it('renders every document when the count is odd', async () => {
     const oddDocuments = [...sampleDocuments, { ...sampleDocuments[0], id: 'doc-3' }];
 
-    await render(<DocumentGrid documents={oddDocuments} />);
+    await render(<DocumentGrid documents={oddDocuments} refreshing={false} onRefresh={() => {}} />);
 
     expect(screen.getByTestId('document-grid-doc-1')).toBeOnTheScreen();
     expect(screen.getByTestId('document-grid-doc-2')).toBeOnTheScreen();
     expect(screen.getByTestId('document-grid-doc-3')).toBeOnTheScreen();
+  });
+
+  it('wires the refreshControl to the given refreshing and onRefresh props', async () => {
+    const onRefresh = jest.fn();
+    await render(
+      <DocumentGrid documents={sampleDocuments} refreshing={true} onRefresh={onRefresh} />,
+    );
+
+    const refreshControl = screen.getByTestId('documents-grid-list').props.refreshControl;
+    expect(refreshControl.props.refreshing).toBe(true);
+
+    refreshControl.props.onRefresh();
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 });

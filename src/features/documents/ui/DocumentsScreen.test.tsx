@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as DocumentPicker from 'expo-document-picker';
 
 import { createInMemoryLocalDocumentsSource } from '../api/inMemoryLocalDocumentsSource';
@@ -169,6 +169,25 @@ describe('DocumentsScreen', () => {
     await fireEvent.press(screen.getByTestId('documents-retry-button'));
 
     expect(await screen.findByText('First Document')).toBeOnTheScreen();
+    expect(getAll).toHaveBeenCalledTimes(2);
+  });
+
+  it('refetches documents when the list is pulled to refresh', async () => {
+    const refreshedDocuments: Document[] = [{ ...sampleDocuments[0], title: 'Updated Document' }];
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockResolvedValueOnce(sampleDocuments)
+      .mockResolvedValueOnce(refreshedDocuments);
+    const repository: DocumentsRepository = { getAll };
+
+    await renderScreen(repository);
+    await screen.findByText('First Document');
+
+    await act(() => {
+      screen.getByTestId('documents-list').props.refreshControl.props.onRefresh();
+    });
+
+    expect(await screen.findByText('Updated Document')).toBeOnTheScreen();
     expect(getAll).toHaveBeenCalledTimes(2);
   });
 

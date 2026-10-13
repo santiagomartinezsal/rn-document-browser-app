@@ -16,7 +16,17 @@ import { SortMenu } from './SortMenu';
 import { ViewModeToggle } from './ViewModeToggle';
 
 export function DocumentsScreen() {
-  const { state, retry, sortBy, setSortBy, viewMode, setViewMode, addDocument } = useDocuments();
+  const {
+    state,
+    retry,
+    isRefreshing,
+    refresh,
+    sortBy,
+    setSortBy,
+    viewMode,
+    setViewMode,
+    addDocument,
+  } = useDocuments();
   const [isAddDocumentModalOpen, setIsAddDocumentModalOpen] = useState(false);
 
   if (state.status === 'error') {
@@ -41,9 +51,17 @@ export function DocumentsScreen() {
           </View>
           <View style={styles.listArea}>
             {viewMode === 'grid' ? (
-              <DocumentGrid documents={documents} />
+              <DocumentGrid
+                documents={documents}
+                refreshing={isRefreshing}
+                onRefresh={() => void refresh()}
+              />
             ) : (
-              <DocumentList documents={documents} />
+              <DocumentList
+                documents={documents}
+                refreshing={isRefreshing}
+                onRefresh={() => void refresh()}
+              />
             )}
           </View>
         </>

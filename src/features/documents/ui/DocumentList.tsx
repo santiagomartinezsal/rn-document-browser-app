@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 
 import { colors, spacing } from '@/shared/ui/theme';
 
@@ -7,9 +7,11 @@ import { DocumentCard } from './DocumentCard';
 
 export interface DocumentListProps {
   documents: Document[];
+  refreshing: boolean;
+  onRefresh: () => void;
 }
 
-export function DocumentList({ documents }: DocumentListProps) {
+export function DocumentList({ documents, refreshing, onRefresh }: DocumentListProps) {
   return (
     <FlatList
       testID="documents-list"
@@ -18,6 +20,14 @@ export function DocumentList({ documents }: DocumentListProps) {
       data={documents}
       keyExtractor={(document) => document.id}
       renderItem={({ item }) => <DocumentCard document={item} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.accent}
+          colors={[colors.accent]}
+        />
+      }
     />
   );
 }

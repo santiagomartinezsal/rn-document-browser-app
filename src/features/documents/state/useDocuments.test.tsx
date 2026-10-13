@@ -87,6 +87,89 @@ describe('useDocuments', () => {
     expect(getAll).toHaveBeenCalledTimes(2);
   });
 
+  it('defaults isRefreshing to false', async () => {
+    const repository = buildRepository({
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    });
+
+    const { result } = await renderWithRepository(repository);
+
+    expect(result.current.isRefreshing).toBe(false);
+  });
+
+  it('replaces the documents with the refreshed result when refresh succeeds', async () => {
+    const refreshedDocuments: Document[] = [{ ...sampleDocuments[0], id: 'doc-2' }];
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockResolvedValueOnce(sampleDocuments)
+      .mockResolvedValueOnce(refreshedDocuments);
+    const repository = buildRepository({ getAll });
+
+    const { result } = await renderWithRepository(repository);
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
+    });
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.state).toEqual({ status: 'success', documents: refreshedDocuments });
+  });
+
+  it('sets isRefreshing while the refresh request is in flight', async () => {
+    const repository = buildRepository({
+      getAll: jest.fn().mockResolvedValue(sampleDocuments),
+    });
+
+    const { result } = await renderWithRepository(repository);
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('success');
+    });
+
+    let resolveRefresh: (documents: Document[]) => void = () => {};
+    jest
+      .mocked(repository.getAll)
+      .mockReturnValueOnce(new Promise((resolve) => (resolveRefresh = resolve)));
+
+    let refreshPromise: Promise<void> = Promise.resolve();
+    await act(() => {
+      refreshPromise = result.current.refresh();
+    });
+
+    expect(result.current.isRefreshing).toBe(true);
+
+    await act(async () => {
+      resolveRefresh(sampleDocuments);
+      await refreshPromise;
+    });
+
+    expect(result.current.isRefreshing).toBe(false);
+  });
+
+  it('keeps the current documents and warns when refresh fails', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const getAll = jest
+      .fn<ReturnType<DocumentsRepository['getAll']>, []>()
+      .mockResolvedValueOnce(sampleDocuments)
+      .mockRejectedValueOnce(new Error('network down'));
+    const repository = buildRepository({ getAll });
+
+    const { result } = await renderWithRepository(repository);
+    await waitFor(() => {
+      expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
+    });
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.state).toEqual({ status: 'success', documents: sampleDocuments });
+    expect(result.current.isRefreshing).toBe(false);
+    expect(warn).toHaveBeenCalledWith('network down');
+    warn.mockRestore();
+  });
+
   it('throws when rendered outside a DocumentsProvider', async () => {
     await expect(renderHook(() => useDocuments())).rejects.toThrow(
       'useDocumentsRepository must be used within a DocumentsProvider',
